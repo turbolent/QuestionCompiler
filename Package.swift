@@ -11,6 +11,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/turbolent/QuestionParser.git", .branch("master")),
+        .package(url: "https://github.com/turbolent/DiffedAssertEqual.git", .branch("master")),
     ],
     targets: [
         .target(
@@ -18,6 +19,6 @@ let package = Package(
             dependencies: ["QuestionParser"]),
         .testTarget(
             name: "QuestionCompilerTests",
-            dependencies: ["QuestionCompiler"]),
+            dependencies: ["QuestionCompiler", "DiffedAssertEqual"]),
     ]
 )
