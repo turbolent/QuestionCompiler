@@ -7,10 +7,4 @@ func t(_ word: String, _ tag: String, _ lemma: String) -> Token {
 }
 
 typealias TestCompiler =
-    Compiler<TestNodeLabel, TestEdgeLabel, TestEnvironment, TestOntology>
-
-func newCompiler() -> TestCompiler {
-    let environment = TestEnvironment()
-    let ontology = TestOntology()
-    return Compiler(environment: environment, ontology: ontology)
-}
+    QuestionCompiler<TestNodeLabel, TestEdgeLabel, TestEnvironment, TestOntology>

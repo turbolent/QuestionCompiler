@@ -2,10 +2,6 @@
 import QuestionParser
 import QuestionCompiler
 
-
-typealias TestNode = Node<TestNodeLabel, TestEdgeLabel>
-
-
 class TestOntology: Ontology {
     typealias N = TestNodeLabel
     typealias E = TestEdgeLabel

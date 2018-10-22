@@ -2,9 +2,9 @@
 public struct Node<N, E>: Hashable
     where N: Hashable, E: Hashable
 {
-    public typealias Node = QuestionCompiler.Node<N, E>
-    public typealias Edge = QuestionCompiler.Edge<E, N>
-    public typealias Filter = QuestionCompiler.Filter<N, E>
+    public typealias Node = GraphNode<N, E>
+    public typealias Edge = GraphEdge<E, N>
+    public typealias Filter = GraphFilter<N, E>
 
     public var label: N
     public var edge: Edge?

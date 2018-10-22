@@ -1,7 +1,11 @@
 
 import QuestionParser
 
-public final class Compiler<N, E, Env, Ont>
+public typealias GraphNode = Node
+public typealias GraphEdge = Edge
+public typealias GraphFilter = Filter
+
+public final class QuestionCompiler<N, E, Env, Ont>
     where Ont: Ontology,
         Ont.Env == Env,
         Ont.N == N,
@@ -11,8 +15,8 @@ public final class Compiler<N, E, Env, Ont>
         case unimplemented
     }
 
-    public typealias Node = QuestionCompiler.Node<N, E>
-    public typealias Edge = QuestionCompiler.Edge<E, N>
+    public typealias Node = GraphNode<N, E>
+    public typealias Edge = GraphEdge<E, N>
 
     public typealias NodeFactory = (Node, [Token]) throws -> Node
     public typealias EdgeContextFactory = (Subject) throws-> EdgeContext
@@ -158,13 +162,13 @@ public final class Compiler<N, E, Env, Ont>
             let edges = try properties.map {
                 try compile(property: $0, subject: subject)
             }
-            return .conjunction(Set(edges))
+            return .conjunction(edges)
 
         case let .or(properties):
             let edges = try properties.map {
                 try compile(property: $0, subject: subject)
             }
-            return .disjunction(Set(edges))
+            return .disjunction(edges)
         }
     }
 
@@ -195,13 +199,13 @@ public final class Compiler<N, E, Env, Ont>
             let filters = try filters.map {
                 try compile(filter: $0, edgeFactory: edgeFactory)
             }
-            return .conjunction(Set(filters))
+            return .conjunction(filters)
 
         case let .or(filters):
             let filters = try filters.map {
                 try compile(filter: $0, edgeFactory: edgeFactory)
             }
-            return .disjunction(Set(filters))
+            return .disjunction(filters)
         }
     }
 
@@ -261,13 +265,13 @@ public final class Compiler<N, E, Env, Ont>
             let edges = try values.map {
                 try compile(value: $0, filter: filter, edgeFactory: edgeFactory)
             }
-            return .disjunction(Set(edges))
+            return .disjunction(edges)
 
         case let .and(values):
             let edges = try values.map {
                 try compile(value: $0, filter: filter, edgeFactory: edgeFactory)
             }
-            return .conjunction(Set(edges))
+            return .conjunction(edges)
 
         case let .relationship(.named(name), second, _):
             let secondEdgeFactory: EdgeFactory = { node, _ in
