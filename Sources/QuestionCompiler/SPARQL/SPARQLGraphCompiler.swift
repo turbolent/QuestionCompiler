@@ -11,8 +11,14 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
     public typealias Edge = GraphEdge<E, N>
     public typealias Filter = GraphFilter<N, E>
 
-    public typealias OpResult = (SPARQL.Op, [SPARQL.OrderComparator])
-    public typealias OpResultMerger = (OpResult, OpResult) -> OpResult
+    public typealias OpResult =
+        (SPARQL.Op, [SPARQL.OrderComparator])
+
+    public typealias OpResultMerger =
+        (OpResult, OpResult) -> OpResult
+
+    public typealias ExpressionMerger =
+        (SPARQL.Expression, SPARQL.Expression) -> SPARQL.Expression
 
     public let environment: Env
     public let backend: Backend
@@ -22,17 +28,27 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
         self.backend = backend
     }
 
-    public func join(left: OpResult, right: OpResult?) -> OpResult {
-        guard let right = right else {
+    public func join(left: OpResult?, right: OpResult?) -> OpResult {
+        switch (left, right) {
+        case (nil, nil):
+            return (.identity, [])
+        case let (left?, nil):
             return left
+        case let (nil, right?):
+            return right
+        case let ((.bgp(triples1), orderComparators1)?,
+                  (.bgp(triples2), orderComparators2)?):
+            return (
+                .bgp(triples1 + triples2),
+                orderComparators1 + orderComparators2
+            )
+        case let ((op1, orderComparators1)?,
+                  (op2, orderComparators2)?):
+            return (
+                .join(op1, op2),
+                orderComparators1 + orderComparators2
+            )
         }
-
-        let (op1, orderComparators1) = left
-        let (op2, orderComparators2) = right
-        return (
-            .join(op1, op2),
-            orderComparators1 + orderComparators2
-        )
     }
 
     public func compile(order: Order) -> SPARQL.Order {
@@ -44,12 +60,7 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
         }
     }
 
-    public func compileNode(
-        node: Node,
-        context: NodeCompilationContext
-    )
-        -> (SPARQL.Node, OpResult?)
-    {
+    public func compile(node: Node, context: NodeCompilationContext) -> (SPARQL.Node, OpResult?) {
         let expandedNode = backend.expand(
             node: node,
             context: context,
@@ -60,10 +71,7 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
             env: environment
         )
         let edgeOpResult = expandedNode.edge.map { edge in
-            compile(
-                edge: edge,
-                node: compiledNode
-            )
+            compile(edge: edge, node: compiledNode)
         }
         // TODO: filtering
         return (compiledNode, edgeOpResult)
@@ -73,9 +81,11 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
         let compiledEdges = edges.map { edge in
             compile(edge: edge, node: node)
         }
-        // TODO: improve
-        return compiledEdges.dropFirst()
-            .reduce(compiledEdges.first!, merge)
+        guard let firstEdge = compiledEdges.first else {
+            return (.identity, [])
+        }
+        let remainingEdges = compiledEdges.dropFirst()
+        return remainingEdges.reduce(firstEdge, merge)
     }
 
     func compile(edge: Edge, node: SPARQL.Node) -> OpResult {
@@ -98,12 +108,7 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
 
         case let .conjunction(edges):
             return compile(edges: edges, node: node) {
-                let (op1, orderComparators1) = $0
-                let (op2, orderComparators2) = $1
-                return (
-                    .join(op1, op2),
-                    orderComparators1 + orderComparators2
-                )
+                join(left: $0, right: $1)
             }
 
         case let .disjunction(edges):
@@ -132,7 +137,7 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
         )
 
         let (compiledOtherNode, otherResult) =
-            compileNode(node: otherNode, context: .triple)
+            compile(node: otherNode, context: .triple)
 
         let triple: Triple
         switch direction {
@@ -163,7 +168,7 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
         }
 
         let (compiledNode, result) =
-            compileNode(node: node, context: .triple)
+            compile(node: node, context: .triple)
 
         guard let (op, orderComparators) = result else {
             // TODO:
