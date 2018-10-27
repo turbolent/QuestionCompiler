@@ -260,12 +260,13 @@ final class SPARQLGraphCompilerTests: XCTestCase {
         let graph = person
             .outgoing(.hasDateOfBirth, birthDate)
 
-        // TODO: filter
-
         let expected = """
             SELECT DISTINCT ?0 {
               ?0 <isA> <person> .
               ?0 <hasDateOfBirth> ?3 .
+              ?1 <hasDateOfBirth> ?2 .
+              ?1 <hasName> "Obama" .
+              FILTER (?3 < ?2)
             }
 
             """
@@ -286,12 +287,11 @@ final class SPARQLGraphCompilerTests: XCTestCase {
         let graph = president
             .outgoing(.hasDateOfBirth, birthDate)
 
-        // TODO: filter
-
         let expected = """
             SELECT DISTINCT ?0 {
               ?0 <isA> <president> .
               ?0 <hasDateOfBirth> ?1 .
+              FILTER (?1 < 1900.0)
             }
 
             """
