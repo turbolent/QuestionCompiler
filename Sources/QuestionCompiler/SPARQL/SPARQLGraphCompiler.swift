@@ -28,22 +28,16 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
         self.backend = backend
     }
 
-    public func join(left: OpResult?, right: OpResult?) -> OpResult {
+    public func join(left: OpResult, right: OpResult) -> OpResult {
         switch (left, right) {
-        case (nil, nil):
-            return (.identity, [])
-        case let (left?, nil):
-            return left
-        case let (nil, right?):
-            return right
-        case let ((.bgp(triples1), orderComparators1)?,
-                  (.bgp(triples2), orderComparators2)?):
+        case let ((.bgp(triples1), orderComparators1),
+                  (.bgp(triples2), orderComparators2)):
             return (
                 .bgp(triples1 + triples2),
                 orderComparators1 + orderComparators2
             )
-        case let ((op1, orderComparators1)?,
-                  (op2, orderComparators2)?):
+        case let ((op1, orderComparators1),
+                  (op2, orderComparators2)):
             return (
                 .join(op1, op2),
                 orderComparators1 + orderComparators2
@@ -156,8 +150,10 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
             )
         }
 
-        let result: OpResult = (.bgp([triple]), [])
-        return join(left: result, right: otherResult)
+        return join(
+            left: (.bgp([triple]), []),
+            right: otherResult ?? (.identity, [])
+        )
     }
 
     public func compileQuery(node: Node) -> SPARQL.Query {
