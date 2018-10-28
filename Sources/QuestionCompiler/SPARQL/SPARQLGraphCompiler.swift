@@ -57,7 +57,7 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
 
     public func compile(filter: Filter, compiledNode: SPARQL.Node, opResult: OpResult) -> OpResult {
 
-        func compileBinaryExpression(otherNode: Node, merge: (Expression, Expression) -> Expression) -> OpResult {
+        func compileBinaryExpression(otherNode: Node, merge: ExpressionMerger) -> OpResult {
 
             let (compiledOtherNode, (otherOp, otherOrderingComparators)) =
                 compile(node: otherNode, context: .filter) {
