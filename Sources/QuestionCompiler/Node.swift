@@ -10,15 +10,18 @@ public struct Node<N, E>: Equatable
     public var label: N
     public var edge: Edge?
     public var filter: Filter?
+    public var order: Order?
 
     public init(
         label: N,
         edge: Edge? = nil,
-        filter: Filter? = nil
+        filter: Filter? = nil,
+        order: Order? = nil
     ) {
         self.label = label
         self.edge = edge
         self.filter = filter
+        self.order = order
     }
 
     public func filtered(_ filter: Filter) -> Node {
@@ -55,6 +58,7 @@ extension Node: Encodable {
         case label
         case edge
         case filter
+        case order
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -63,5 +67,6 @@ extension Node: Encodable {
         try container.encode(label, forKey: .label)
         try container.encode(edge, forKey: .edge)
         try container.encode(filter, forKey: .filter)
+        try container.encode(order, forKey: .order)
     }
 }
