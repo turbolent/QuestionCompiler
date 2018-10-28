@@ -49,6 +49,12 @@ public struct Node<N, E>: Equatable
         result.edge = result.edge.map { $0.or(edge) } ?? edge
         return result
     }
+
+    public func ordered(_ order: Order) -> Node {
+        var result = self
+        result.order = order
+        return result
+    }
 }
 
 extension Node: Encodable {

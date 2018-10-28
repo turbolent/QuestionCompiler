@@ -482,4 +482,35 @@ final class SPARQLGraphCompilerTests: XCTestCase {
         let actual = try compileToSPARQL(node: graph, env: env)
         diffedAssertEqual(actual, expected)
     }
+
+    func testQ17() throws {
+        let env = TestEnvironment()
+
+        let state = env
+            .newNode()
+            .hasName("California")
+
+        let population = env
+            .newNode()
+            .ordered(.descending)
+
+        let graph = env
+            .newNode()
+            .isA(TestClasses.city)
+            .outgoing(.isLocatedIn, state)
+            .outgoing(.hasPopulation, population)
+
+        let expected = """
+            SELECT DISTINCT ?2 {
+              ?2 <isA> <city> .
+              ?2 <isLocatedIn> ?0 .
+              ?0 <hasName> "California" .
+              ?2 <hasPopulation> ?1 .
+            }
+            ORDER BY DESC(?1)
+
+            """
+        let actual = try compileToSPARQL(node: graph, env: env)
+        diffedAssertEqual(actual, expected)
+    }
 }

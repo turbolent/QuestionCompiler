@@ -102,13 +102,19 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
             nodeLabel: expandedNode.label,
             env: environment
         )
-        let edgeOpResult = expandedNode.edge.map {
-            compile(edge: $0, compiledNode: compiledNode)
+
+        var opResult: OpResult = .identity
+
+        if let edge = expandedNode.edge {
+            opResult = compile(
+                edge: edge,
+                compiledNode: compiledNode
+            )
         }
 
-        var opResult = continuation(
+        opResult = continuation(
             compiledNode,
-            edgeOpResult ?? .identity
+            opResult
         )
 
         if let filter = node.filter {
@@ -117,6 +123,15 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
                 compiledNode: compiledNode,
                 opResult: opResult
             )
+        }
+
+        if let order = node.order {
+            let compiledOrder = compile(order: order)
+            let orderComparator = SPARQL.OrderComparator(
+                order: compiledOrder,
+                expression: .node(compiledNode)
+            )
+            opResult.orderComparators.append(orderComparator)
         }
 
         return (compiledNode, opResult)
@@ -235,14 +250,14 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
 
         // TODO: optimize op
         return Query(op:
-            .distinct(
-                .project(
-                    variables,
-                    .orderBy(
-                        preparedOp,
-                        opResult.orderComparators
+            .orderBy(
+                .distinct(
+                    .project(
+                        variables,
+                        preparedOp
                     )
-                )
+                ),
+                opResult.orderComparators
             )
         )
     }

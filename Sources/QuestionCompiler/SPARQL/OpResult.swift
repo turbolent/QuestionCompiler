@@ -8,8 +8,8 @@ public struct OpResult {
         orderComparators: []
     )
 
-    public let op: SPARQL.Op
-    public let orderComparators: [SPARQL.OrderComparator]
+    public var op: SPARQL.Op
+    public var orderComparators: [SPARQL.OrderComparator]
 
     public init(
         op: SPARQL.Op,

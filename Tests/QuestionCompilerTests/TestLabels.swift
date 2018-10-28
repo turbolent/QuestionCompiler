@@ -42,4 +42,5 @@ struct TestEdgeLabel: Equatable, Encodable {
     static let hasDateOfBirth = TestEdgeLabel(name: "hasDateOfBirth")
     static let attends = TestEdgeLabel(name: "attends")
     static let hasPerformer = TestEdgeLabel(name: "hasPerformer")
+    static let hasPopulation = TestEdgeLabel(name: "hasPopulation")
 }
