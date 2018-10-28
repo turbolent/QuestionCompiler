@@ -1,6 +1,7 @@
 
-public indirect enum Edge<E, N>: Hashable
-    where E: Hashable, N: Hashable
+public indirect enum Edge<E, N>: Equatable
+    where E: Equatable & Encodable,
+        N: Equatable & Encodable
 {
     public typealias Node = GraphNode<N, E>
     public typealias Edge = GraphEdge<E, N>
@@ -47,6 +48,50 @@ public indirect enum Edge<E, N>: Hashable
 
         default:
             return .disjunction([self, edge])
+        }
+    }
+}
+
+extension Edge: Encodable {
+
+    private enum CodingKeys: CodingKey {
+        case type
+        case subtype
+        case source
+        case target
+        case label
+        case edges
+    }
+
+    private enum Subtype: String, Encodable {
+        case incoming
+        case outgoing
+        case conjunction
+        case disjunction
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode("edge", forKey: .type)
+
+        switch self {
+        case let .incoming(source, label):
+            try container.encode(Subtype.incoming, forKey: .subtype)
+            try container.encode(source, forKey: .source)
+            try container.encode(label, forKey: .label)
+
+        case let .outgoing(label, target):
+            try container.encode(Subtype.outgoing, forKey: .subtype)
+            try container.encode(label, forKey: .label)
+            try container.encode(target, forKey: .target)
+
+        case let .conjunction(edges):
+            try container.encode(Subtype.conjunction, forKey: .subtype)
+            try container.encode(edges, forKey: .edges)
+
+        case let .disjunction(edges):
+            try container.encode(Subtype.disjunction, forKey: .subtype)
+            try container.encode(edges, forKey: .edges)
         }
     }
 }

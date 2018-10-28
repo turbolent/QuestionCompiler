@@ -1,9 +1,15 @@
 
-enum TestNodeLabel: Hashable {
+enum TestNodeLabel: Equatable {
     case variable(Int)
     case id(String)
     case string(String)
     case number(Double, unit: String?)
+}
+
+extension TestNodeLabel: Encodable {
+    func encode(to encoder: Encoder) throws {
+        fatalError("not implemented")
+    }
 }
 
 struct TestClasses {
@@ -19,7 +25,7 @@ struct TestClasses {
     private init() {}
 }
 
-struct TestEdgeLabel: Hashable {
+struct TestEdgeLabel: Equatable, Encodable {
     let name: String
 
     static let isA = TestEdgeLabel(name: "isA")

@@ -22,9 +22,6 @@ class TestSPARQLBackend: SPARQLBackend {
 
         case let .number(value, _):
             return .literal(.withDatatype(String(value), .double))
-
-        default:
-            fatalError("not implemented")
         }
     }
 

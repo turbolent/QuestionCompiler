@@ -1,6 +1,7 @@
 
-public struct Node<N, E>: Hashable
-    where N: Hashable, E: Hashable
+public struct Node<N, E>: Equatable
+    where N: Equatable & Encodable,
+        E: Equatable & Encodable
 {
     public typealias Node = GraphNode<N, E>
     public typealias Edge = GraphEdge<E, N>
@@ -44,5 +45,23 @@ public struct Node<N, E>: Hashable
         var result = self
         result.edge = result.edge.map { $0.or(edge) } ?? edge
         return result
+    }
+}
+
+extension Node: Encodable {
+
+    private enum CodingKeys: CodingKey {
+        case type
+        case label
+        case edge
+        case filter
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode("node", forKey: .type)
+        try container.encode(label, forKey: .label)
+        try container.encode(edge, forKey: .edge)
+        try container.encode(filter, forKey: .filter)
     }
 }

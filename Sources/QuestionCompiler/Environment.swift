@@ -1,7 +1,7 @@
 
 public protocol Environment {
-    associatedtype N: Hashable
-    associatedtype E: Hashable
+    associatedtype N: Equatable & Encodable
+    associatedtype E: Equatable & Encodable
 
     func newNode() -> Node<N, E>
 }

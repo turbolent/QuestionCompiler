@@ -1,8 +1,9 @@
 
 import QuestionParser
 
-public indirect enum Filter<N, E>: Hashable
-    where N: Hashable, E: Hashable
+public indirect enum Filter<N, E>: Equatable
+    where N: Equatable & Encodable,
+        E: Equatable & Encodable
 {
     public typealias Node = GraphNode<N, E>
     public typealias Filter = GraphFilter<N, E>
@@ -26,6 +27,47 @@ public indirect enum Filter<N, E>: Hashable
             return .conjunction(newFilters)
         default:
             return .conjunction([self, filter])
+        }
+    }
+}
+
+
+extension Filter: Encodable {
+
+    private enum CodingKeys: CodingKey {
+        case type
+        case subtype
+        case filters
+        case node
+    }
+
+    private enum Subtype: String, Encodable {
+        case conjunction
+        case equals
+        case lessThan
+        case greaterThan
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode("filter", forKey: .type)
+
+        switch self {
+        case let .conjunction(filters):
+            try container.encode(Subtype.conjunction, forKey: .subtype)
+            try container.encode(filters, forKey: .filters)
+
+        case let .equals(node):
+            try container.encode(Subtype.equals, forKey: .subtype)
+            try container.encode(node, forKey: .node)
+
+        case let .lessThan(node):
+            try container.encode(Subtype.lessThan, forKey: .subtype)
+            try container.encode(node, forKey: .node)
+
+        case let .greaterThan(node):
+            try container.encode(Subtype.greaterThan, forKey: .subtype)
+            try container.encode(node, forKey: .node)
         }
     }
 }
