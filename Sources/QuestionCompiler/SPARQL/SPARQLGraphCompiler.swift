@@ -11,9 +11,6 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
     public typealias Edge = GraphEdge<E, N>
     public typealias Filter = GraphFilter<N, E>
 
-    public typealias OpResult =
-        (SPARQL.Op, [SPARQL.OrderComparator])
-
     public typealias OpResultMerger =
         (OpResult, OpResult) -> OpResult
 
@@ -26,24 +23,6 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
     public init(environment: Env, backend: Backend) {
         self.environment = environment
         self.backend = backend
-    }
-
-    public func join(left: OpResult, right: OpResult) -> OpResult {
-        switch (left, right) {
-        case let ((.bgp(triples1), orderComparators1),
-                  (.bgp(triples2), orderComparators2)):
-            return (
-                .bgp(triples1 + triples2),
-                orderComparators1 + orderComparators2
-            )
-
-        case let ((op1, orderComparators1),
-                  (op2, orderComparators2)):
-            return (
-                .join(op1, op2),
-                orderComparators1 + orderComparators2
-            )
-        }
     }
 
     public func compile(order: Order) -> SPARQL.Order {
@@ -59,22 +38,25 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
 
         func compileBinaryExpression(otherNode: Node, merge: ExpressionMerger) -> OpResult {
 
-            let (compiledOtherNode, (otherOp, otherOrderingComparators)) =
+            let (compiledOtherNode, otherOpResult) =
                 compile(node: otherNode, context: .filter) {
                     (compiledOtherNode, otherOpResult) in
 
-                    join(left: opResult, right: otherOpResult)
+                    opResult.join(otherOpResult)
                 }
 
             let leftExpression = backend.prepare(
-                left: .node(compiledNode),
+                leftExpression: .node(compiledNode),
                 otherNode: otherNode
             )
             let rightExpression = Expression.node(compiledOtherNode)
             let finalExpression = merge(leftExpression, rightExpression)
-            let filterOp = Op.filter(finalExpression, otherOp)
+            let filterOp = Op.filter(finalExpression, otherOpResult.op)
 
-            return (filterOp, otherOrderingComparators)
+            return OpResult(
+                op: filterOp,
+                orderComparators: otherOpResult.orderComparators
+            )
         }
 
         switch filter {
@@ -120,14 +102,21 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
             nodeLabel: expandedNode.label,
             env: environment
         )
-        let edgeOpResult = expandedNode.edge.map { edge in
-            compile(edge: edge, compiledNode: compiledNode)
+        let edgeOpResult = expandedNode.edge.map {
+            compile(edge: $0, compiledNode: compiledNode)
         }
 
-        var opResult = continuation(compiledNode, edgeOpResult ?? (.identity, []))
+        var opResult = continuation(
+            compiledNode,
+            edgeOpResult ?? .identity
+        )
 
         if let filter = node.filter {
-            opResult = compile(filter: filter, compiledNode: compiledNode, opResult: opResult)
+            opResult = compile(
+                filter: filter,
+                compiledNode: compiledNode,
+                opResult: opResult
+            )
         }
 
         return (compiledNode, opResult)
@@ -138,7 +127,7 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
             compile(edge: edge, compiledNode: compiledNode)
         }
         guard let firstEdge = compiledEdges.first else {
-            return (.identity, [])
+            return .identity
         }
         let remainingEdges = compiledEdges.dropFirst()
         return remainingEdges.reduce(firstEdge, merge)
@@ -164,17 +153,12 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
 
         case let .conjunction(edges):
             return compile(edges: edges, compiledNode: compiledNode) {
-                join(left: $0, right: $1)
+                $0.join($1)
             }
 
         case let .disjunction(edges):
             return compile(edges: edges, compiledNode: compiledNode) {
-                let (op1, orderComparators1) = $0
-                let (op2, orderComparators2) = $1
-                return (
-                    .union(op1, op2),
-                    orderComparators1 + orderComparators2
-                )
+                $0.union($1)
             }
         }
     }
@@ -212,10 +196,12 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
                 )
             }
 
-            return join(
-                left: (.bgp([triple]), []),
-                right: otherOpResult
+            let result = OpResult(
+                op: .bgp([triple]),
+                orderComparators: []
             )
+
+            return result.join(otherOpResult)
         }
 
         return opResult
@@ -228,7 +214,7 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
             fatalError("root node needs to have edges")
         }
 
-        let (compiledNode, (op, orderComparators)) =
+        let (compiledNode, opResult) =
             compile(node: node, context: .triple) { (_, result) in result }
 
         guard case let .variable(variableName) = compiledNode else {
@@ -237,7 +223,7 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
         }
 
         let preparedOp = backend.prepare(
-            op: op,
+            op: opResult.op,
             variable: variableName,
             env: environment
         )
@@ -254,7 +240,7 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
                     variables,
                     .orderBy(
                         preparedOp,
-                        orderComparators
+                        opResult.orderComparators
                     )
                 )
             )

@@ -21,7 +21,7 @@ public protocol SPARQLBackend {
     /// Expand the given node into another, possibly more complex node, if needed
     func expand(node: Node, context: NodeCompilationContext, env: Env) -> Node
 
-    func prepare(left: SPARQL.Expression, otherNode: Node) -> SPARQL.Expression
+    func prepare(leftExpression: SPARQL.Expression, otherNode: Node) -> SPARQL.Expression
 
     func prepare(op: SPARQL.Op, variable: String, env: Env) -> SPARQL.Op
 
@@ -34,8 +34,8 @@ extension SPARQLBackend {
         return node
     }
 
-    public func prepare(left: SPARQL.Expression, otherNode: Node) -> SPARQL.Expression {
-        return left
+    public func prepare(leftExpression: SPARQL.Expression, otherNode: Node) -> SPARQL.Expression {
+        return leftExpression
     }
 
     public func prepare(op: SPARQL.Op, variable: String, env: Env) -> SPARQL.Op {
