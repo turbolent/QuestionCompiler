@@ -55,6 +55,21 @@ public struct Node<N, E>: Equatable
         result.order = order
         return result
     }
+
+    public func aggregating(
+        _ node: Node,
+        function: AggregateFunction,
+        distinct: Bool,
+        grouping: Node
+    ) -> Node {
+        let aggregate: Edge = .aggregate(
+            node,
+            function: function,
+            distinct: distinct,
+            grouping: grouping
+        )
+        return and(aggregate)
+    }
 }
 
 extension Node: Encodable {
