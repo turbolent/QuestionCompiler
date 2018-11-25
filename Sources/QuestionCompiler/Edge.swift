@@ -1,7 +1,7 @@
 
 public indirect enum Edge<E, N>: Equatable
-    where E: Equatable & Encodable,
-        N: Equatable & Encodable
+    where E: EdgeLabel,
+        N: NodeLabel
 {
     public typealias Node = GraphNode<N, E>
     public typealias Edge = GraphEdge<E, N>

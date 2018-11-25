@@ -1,5 +1,7 @@
 
-enum TestNodeLabel: Equatable {
+import QuestionCompiler
+
+enum TestNodeLabel: NodeLabel {
     case variable(Int)
     case id(String)
     case string(String)
@@ -25,7 +27,7 @@ struct TestClasses {
     private init() {}
 }
 
-struct TestEdgeLabel: Equatable, Encodable {
+struct TestEdgeLabel: EdgeLabel {
     let name: String
 
     static let isA = TestEdgeLabel(name: "isA")

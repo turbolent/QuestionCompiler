@@ -1,7 +1,7 @@
 
 public struct Node<N, E>: Equatable
-    where N: Equatable & Encodable,
-        E: Equatable & Encodable
+    where N: NodeLabel,
+        E: EdgeLabel
 {
     public typealias Node = GraphNode<N, E>
     public typealias Edge = GraphEdge<E, N>

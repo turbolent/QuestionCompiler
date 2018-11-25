@@ -9,7 +9,7 @@ public protocol Ontology {
 
     typealias Node = GraphNode<N, E>
     typealias Edge = GraphEdge<E, N>
-    typealias Filter = GraphFilter<E, N>
+    typealias Filter = GraphFilter<N, E>
 
     /// Return an edge which will identify a node representing the subject to be a person.
     ///

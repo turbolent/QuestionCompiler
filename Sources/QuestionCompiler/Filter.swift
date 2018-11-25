@@ -2,8 +2,8 @@
 import QuestionParser
 
 public indirect enum Filter<N, E>: Equatable
-    where N: Equatable & Encodable,
-        E: Equatable & Encodable
+    where N: NodeLabel,
+        E: EdgeLabel
 {
     public typealias Node = GraphNode<N, E>
     public typealias Filter = GraphFilter<N, E>

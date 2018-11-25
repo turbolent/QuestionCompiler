@@ -1,7 +1,7 @@
 
 public protocol Environment {
-    associatedtype N: Equatable & Encodable
-    associatedtype E: Equatable & Encodable
+    associatedtype N: NodeLabel
+    associatedtype E: EdgeLabel
 
     func newNode() -> Node<N, E>
 }
