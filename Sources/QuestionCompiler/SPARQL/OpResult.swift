@@ -21,7 +21,16 @@ public struct OpResult {
 
     public func join(_ other: OpResult) -> OpResult {
 
-        // optimization
+        // optimizations
+
+        if case .identity = op {
+            return other
+        }
+
+        if case .identity = other.op {
+            return self
+        }
+
         if case let (.bgp(triples), .bgp(otherTriples)) = (op, other.op) {
             return OpResult(
                 op: .bgp(triples + otherTriples),
@@ -29,6 +38,8 @@ public struct OpResult {
                     orderComparators + other.orderComparators
             )
         }
+
+        // default
 
         return OpResult(
             op: .join(op, other.op),
