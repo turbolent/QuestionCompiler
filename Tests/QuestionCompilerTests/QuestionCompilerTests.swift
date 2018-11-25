@@ -35,7 +35,7 @@ final class QuestionCompilerTests: XCTestCase {
         let expected = person
             .incoming(movie, .hasCastMember)
 
-        diffedAssertEqual(result, [expected])
+        diffedAssertEqual([expected], result)
     }
 
     func testQ2() throws {
@@ -63,7 +63,7 @@ final class QuestionCompilerTests: XCTestCase {
         let expected = movie
             .outgoing(.hasCastMember, actress)
 
-        diffedAssertEqual(result, [expected])
+        diffedAssertEqual([expected], result)
     }
 
     func testQ3() throws {
@@ -91,7 +91,7 @@ final class QuestionCompilerTests: XCTestCase {
         let expected = person
             .outgoing(.hasSpouse, billClinton)
 
-        diffedAssertEqual(result, [expected])
+        diffedAssertEqual([expected], result)
     }
 
     func testQ4() throws {
@@ -115,11 +115,14 @@ final class QuestionCompilerTests: XCTestCase {
         )
 
         let env = TestEnvironment()
+
         let elevation: Node = .number(1000.0, unit: "meter")
+
         let expected = env.newNode()
             .isA(TestClasses.mountain)
             .outgoing(.hasElevation, elevation)
-        diffedAssertEqual(result, [expected])
+
+        diffedAssertEqual([expected], result)
     }
 
     func testQ5() throws {
@@ -152,16 +155,21 @@ final class QuestionCompilerTests: XCTestCase {
         )
 
         let env = TestEnvironment()
+
         let author = env.newNode()
             .isA(TestClasses.author)
+
         let place = env.newNode()
             .hasName("Berlin")
+
         let place2 = env.newNode()
             .hasName("Paris")
+
         let expected = author
             .outgoing(.hasPlaceOfBirth, place)
             .outgoing(.hasPlaceOfDeath, place2)
-        diffedAssertEqual(result, [expected])
+
+        diffedAssertEqual([expected], result)
     }
 
     func testQ6() throws {
@@ -188,7 +196,7 @@ final class QuestionCompilerTests: XCTestCase {
         let grandchild = env.newNode()
             .incoming(bill, .hasGrandChild)
 
-        diffedAssertEqual(result, [child, grandchild])
+        diffedAssertEqual([child, grandchild], result)
     }
 
     func testQ7() throws {
@@ -223,7 +231,7 @@ final class QuestionCompilerTests: XCTestCase {
             .isA(TestClasses.city)
             .and(.outgoing(.isLocatedIn, china))
 
-        diffedAssertEqual(result, [japaneseCities, chineseCities])
+        diffedAssertEqual([japaneseCities, chineseCities], result)
     }
 
     func testQ8() throws {
@@ -254,7 +262,7 @@ final class QuestionCompilerTests: XCTestCase {
         let expected = thing
             .outgoing(.hasAuthor, author)
 
-        diffedAssertEqual(result, [expected])
+        diffedAssertEqual([expected], result)
     }
 
     func testQ9() throws {
@@ -294,7 +302,7 @@ final class QuestionCompilerTests: XCTestCase {
         let expected = person
             .outgoing(.hasDateOfBirth, birthDate)
 
-        diffedAssertEqual(result, [expected])
+        diffedAssertEqual([expected], result)
     }
 
     func testQ10() throws {
@@ -329,7 +337,7 @@ final class QuestionCompilerTests: XCTestCase {
         let expected = president
             .outgoing(.hasDateOfBirth, birthDate)
 
-        diffedAssertEqual(result, [expected])
+        diffedAssertEqual([expected], result)
     }
 
     func testQ11() throws {
@@ -377,7 +385,7 @@ final class QuestionCompilerTests: XCTestCase {
                 .or(Edge.outgoing(.hasPlaceOfDeath, place2))
             )
 
-        diffedAssertEqual(result, [expected])
+        diffedAssertEqual([expected], result)
     }
 
     func testQ12() throws {
@@ -413,7 +421,7 @@ final class QuestionCompilerTests: XCTestCase {
                 .or(Edge.outgoing(.attends, place2))
             )
 
-        diffedAssertEqual(result, [expected])
+        diffedAssertEqual([expected], result)
     }
 
     func testQ13() throws {
@@ -447,7 +455,7 @@ final class QuestionCompilerTests: XCTestCase {
             .and(Edge.outgoing(.attends, place))
             .and(Edge.outgoing(.attends, place2))
 
-        diffedAssertEqual(result, [expected])
+        diffedAssertEqual([expected], result)
     }
 
     func testQ14() throws {
@@ -485,7 +493,7 @@ final class QuestionCompilerTests: XCTestCase {
                 .or(Edge.outgoing(.attends, place2))
             )
 
-        diffedAssertEqual(result, [expected])
+        diffedAssertEqual([expected], result)
     }
 
     func testQ15() throws {
@@ -521,7 +529,7 @@ final class QuestionCompilerTests: XCTestCase {
             .and(Edge.outgoing(.attends, place))
             .and(Edge.outgoing(.attends, place2))
 
-        diffedAssertEqual(result, [expected])
+        diffedAssertEqual([expected], result)
     }
 
     func testQ16() throws {
@@ -550,7 +558,7 @@ final class QuestionCompilerTests: XCTestCase {
             .isA(TestClasses.album)
             .outgoing(.hasPerformer, artist)
 
-        diffedAssertEqual(result, [expected])
+        diffedAssertEqual([expected], result)
     }
 
 
@@ -594,7 +602,7 @@ final class QuestionCompilerTests: XCTestCase {
         let expected = person
             .outgoing(.hasSpouse, daughter)
 
-        diffedAssertEqual(result, [expected])
+        diffedAssertEqual([expected], result)
     }
 
     func testQ18() throws {
@@ -610,6 +618,6 @@ final class QuestionCompilerTests: XCTestCase {
         let expected = person
             .incoming(authored, .hasAuthor)
 
-        diffedAssertEqual(result, [expected])
+        diffedAssertEqual([expected], result)
     }
 }

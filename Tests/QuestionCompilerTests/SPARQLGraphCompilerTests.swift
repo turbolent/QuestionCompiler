@@ -37,7 +37,7 @@ final class SPARQLGraphCompilerTests: XCTestCase {
 
             """
         let actual = try compileToSPARQL(node: graph, env: env)
-        diffedAssertEqual(actual, expected)
+        diffedAssertEqual(expected, actual)
     }
 
     func testQ2() throws {
@@ -61,7 +61,7 @@ final class SPARQLGraphCompilerTests: XCTestCase {
 
             """
         let actual = try compileToSPARQL(node: graph, env: env)
-        diffedAssertEqual(actual, expected)
+        diffedAssertEqual(expected, actual)
     }
 
     func testQ3() throws {
@@ -85,7 +85,7 @@ final class SPARQLGraphCompilerTests: XCTestCase {
 
             """
         let actual = try compileToSPARQL(node: graph, env: env)
-        diffedAssertEqual(actual, expected)
+        diffedAssertEqual(expected, actual)
     }
 
     func testQ4() throws {
@@ -105,7 +105,7 @@ final class SPARQLGraphCompilerTests: XCTestCase {
 
             """
         let actual = try compileToSPARQL(node: graph, env: env)
-        diffedAssertEqual(actual, expected)
+        diffedAssertEqual(expected, actual)
     }
 
     func testQ5() throws {
@@ -135,7 +135,7 @@ final class SPARQLGraphCompilerTests: XCTestCase {
 
             """
         let actual = try compileToSPARQL(node: graph, env: env)
-        diffedAssertEqual(actual, expected)
+        diffedAssertEqual(expected, actual)
     }
 
     func testQ6() throws {
@@ -160,7 +160,7 @@ final class SPARQLGraphCompilerTests: XCTestCase {
 
             """
         let childActual = try compileToSPARQL(node: child, env: env)
-        diffedAssertEqual(childActual, childExpected)
+        diffedAssertEqual(childExpected, childActual)
 
         let grandchildExpected = """
             SELECT DISTINCT ?2 {
@@ -170,7 +170,7 @@ final class SPARQLGraphCompilerTests: XCTestCase {
 
             """
         let grandchildActual = try compileToSPARQL(node: grandchild, env: env)
-        diffedAssertEqual(grandchildActual, grandchildExpected)
+        diffedAssertEqual(grandchildExpected, grandchildActual)
     }
 
     func testQ7() throws {
@@ -201,7 +201,7 @@ final class SPARQLGraphCompilerTests: XCTestCase {
 
             """
         let japaneseCitiesActual = try compileToSPARQL(node: japaneseCities, env: env)
-        diffedAssertEqual(japaneseCitiesActual, japaneseCitiesExpected)
+        diffedAssertEqual(japaneseCitiesExpected, japaneseCitiesActual)
 
         let chineseCitiesExpected = """
             SELECT DISTINCT ?3 {
@@ -212,7 +212,7 @@ final class SPARQLGraphCompilerTests: XCTestCase {
 
             """
         let chineseCitiesActual = try compileToSPARQL(node: chineseCities, env: env)
-        diffedAssertEqual(chineseCitiesActual, chineseCitiesExpected)
+        diffedAssertEqual(chineseCitiesExpected, chineseCitiesActual)
 
     }
 
@@ -236,7 +236,7 @@ final class SPARQLGraphCompilerTests: XCTestCase {
 
             """
         let actual = try compileToSPARQL(node: graph, env: env)
-        diffedAssertEqual(actual, expected)
+        diffedAssertEqual(expected, actual)
     }
 
     func testQ9() throws {
@@ -271,7 +271,7 @@ final class SPARQLGraphCompilerTests: XCTestCase {
 
             """
         let actual = try compileToSPARQL(node: graph, env: env)
-        diffedAssertEqual(actual, expected)
+        diffedAssertEqual(expected, actual)
     }
 
     func testQ10() throws {
@@ -296,7 +296,7 @@ final class SPARQLGraphCompilerTests: XCTestCase {
 
             """
         let actual = try compileToSPARQL(node: graph, env: env)
-        diffedAssertEqual(actual, expected)
+        diffedAssertEqual(expected, actual)
     }
 
     func testQ11() throws {
@@ -333,7 +333,7 @@ final class SPARQLGraphCompilerTests: XCTestCase {
 
             """
         let actual = try compileToSPARQL(node: graph, env: env)
-        diffedAssertEqual(actual, expected)
+        diffedAssertEqual(expected, actual)
     }
 
     func testQ12() throws {
@@ -370,7 +370,7 @@ final class SPARQLGraphCompilerTests: XCTestCase {
 
             """
         let actual = try compileToSPARQL(node: graph, env: env)
-        diffedAssertEqual(actual, expected)
+        diffedAssertEqual(expected, actual)
     }
 
     func testQ13() throws {
@@ -402,7 +402,7 @@ final class SPARQLGraphCompilerTests: XCTestCase {
 
             """
         let actual = try compileToSPARQL(node: graph, env: env)
-        diffedAssertEqual(actual, expected)
+        diffedAssertEqual(expected, actual)
     }
 
     func testQ14() throws {
@@ -426,7 +426,7 @@ final class SPARQLGraphCompilerTests: XCTestCase {
 
             """
         let actual = try compileToSPARQL(node: graph, env: env)
-        diffedAssertEqual(actual, expected)
+        diffedAssertEqual(expected, actual)
     }
 
     func testQ15() throws {
@@ -458,7 +458,7 @@ final class SPARQLGraphCompilerTests: XCTestCase {
 
             """
         let actual = try compileToSPARQL(node: graph, env: env)
-        diffedAssertEqual(actual, expected)
+        diffedAssertEqual(expected, actual)
     }
 
     func testQ16() throws {
@@ -480,7 +480,7 @@ final class SPARQLGraphCompilerTests: XCTestCase {
 
             """
         let actual = try compileToSPARQL(node: graph, env: env)
-        diffedAssertEqual(actual, expected)
+        diffedAssertEqual(expected, actual)
     }
 
     func testQ17() throws {
@@ -511,6 +511,6 @@ final class SPARQLGraphCompilerTests: XCTestCase {
 
             """
         let actual = try compileToSPARQL(node: graph, env: env)
-        diffedAssertEqual(actual, expected)
+        diffedAssertEqual(expected, actual)
     }
 }
