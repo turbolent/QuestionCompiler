@@ -25,6 +25,31 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
         self.backend = backend
     }
 
+    public func compile(
+        aggregateFunction: AggregateFunction,
+        distinct: Bool,
+        compiledNode: SPARQL.Node
+    ) -> SPARQL.Aggregation {
+
+        let expression: Expression = .node(compiledNode)
+        switch aggregateFunction {
+        case .avg:
+            return .avg(expression, distinct: distinct)
+        case .count:
+            return .count(expression, distinct: distinct)
+        case .min:
+            return .min(expression, distinct: distinct)
+        case .max:
+            return .max(expression, distinct: distinct)
+        case .sample:
+            return .sample(expression, distinct: distinct)
+        case .sum:
+            return .sum(expression, distinct: distinct)
+        case .groupConcat:
+            return .groupConcat(expression, distinct: distinct, separator: "\u{001F}")
+        }
+    }
+
     public func compile(order: Order) -> SPARQL.Order {
         switch order {
         case .ascending:
