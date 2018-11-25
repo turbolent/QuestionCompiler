@@ -250,14 +250,14 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
 
         // TODO: optimize op
         return Query(op:
-            .orderBy(
-                .distinct(
-                    .project(
-                        variables,
-                        preparedOp
+            .distinct(
+                .project(
+                    variables,
+                    .orderBy(
+                        preparedOp,
+                        opResult.orderComparators
                     )
-                ),
-                opResult.orderComparators
+                )
             )
         )
     }
