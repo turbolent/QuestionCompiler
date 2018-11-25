@@ -10,6 +10,12 @@ public indirect enum Edge<E, N>: Equatable
     case outgoing(_ label: E, _ target: Node)
     case conjunction([Edge])
     case disjunction([Edge])
+    case aggregate(
+        Node,
+        function: AggregateFunction,
+        distinct: Bool,
+        grouping: Node
+    )
 
     public func and(_ edge: Edge) -> Edge {
         switch (self, edge) {
@@ -61,6 +67,10 @@ extension Edge: Encodable {
         case target
         case label
         case edges
+        case node
+        case function
+        case distinct
+        case grouping
     }
 
     private enum Subtype: String, Encodable {
@@ -68,6 +78,7 @@ extension Edge: Encodable {
         case outgoing
         case conjunction
         case disjunction
+        case aggregate
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -92,6 +103,13 @@ extension Edge: Encodable {
         case let .disjunction(edges):
             try container.encode(Subtype.disjunction, forKey: .subtype)
             try container.encode(edges, forKey: .edges)
+
+        case let .aggregate(node, function, distinct, grouping):
+            try container.encode(Subtype.aggregate, forKey: .subtype)
+            try container.encode(node, forKey: .node)
+            try container.encode(function, forKey: .function)
+            try container.encode(distinct, forKey: .distinct)
+            try container.encode(grouping, forKey: .grouping)
         }
     }
 }
