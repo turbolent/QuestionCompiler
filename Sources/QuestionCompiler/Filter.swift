@@ -1,7 +1,7 @@
 
 import QuestionParser
 
-public indirect enum Filter<N, E>: Equatable
+public indirect enum Filter<N, E>: Hashable
     where N: NodeLabel,
         E: EdgeLabel
 {

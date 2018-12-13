@@ -1,5 +1,5 @@
 
-public indirect enum Edge<E, N>: Equatable
+public indirect enum Edge<E, N>: Hashable
     where E: EdgeLabel,
         N: NodeLabel
 {

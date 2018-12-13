@@ -1,5 +1,5 @@
 
-public struct Node<N, E>: Equatable
+public struct Node<N, E>: Hashable
     where N: NodeLabel,
         E: EdgeLabel
 {
