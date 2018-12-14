@@ -11,7 +11,7 @@ final class SPARQLGraphCompilerTests: XCTestCase {
     private func compileToSPARQL(node: TestNode, env: TestEnvironment) throws -> String {
         let backend = TestSPARQLBackend()
         let compiler = SPARQLGraphCompiler(environment: env, backend: backend)
-        let query = compiler.compileQuery(node: node)
+        let query = try compiler.compileQuery(node: node)
         let context = Context(prefixMapping: [:])
         return try query.serializeToSPARQL(depth: 0, context: context)
     }

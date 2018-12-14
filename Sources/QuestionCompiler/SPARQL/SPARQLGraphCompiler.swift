@@ -11,6 +11,13 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
     public typealias Edge = GraphEdge<E, N>
     public typealias Filter = GraphFilter<N, E>
 
+    public enum Error: Swift.Error {
+        case missingEdge
+        case finalNodeNotCompiledToVariable
+        case aggregatedNodeNotCompiledToVariable
+        case groupingNodeNotCompiledToVariable
+    }
+
     private typealias Result = (
         primaryCompiledNodes: Set<SPARQL.Node>,
         secondaryCompiledNodes: Set<SPARQL.Node>,
@@ -66,13 +73,13 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
         }
     }
 
-    private func compile(filter: Filter, compiledNode: SPARQL.Node, opResult: OpResult) -> OpResult {
+    private func compile(filter: Filter, compiledNode: SPARQL.Node, opResult: OpResult) throws -> OpResult {
 
-        func compileBinaryExpression(otherNode: Node, merge: ExpressionMerger) -> OpResult {
+        func compileBinaryExpression(otherNode: Node, merge: ExpressionMerger) throws -> OpResult {
 
             // TODO: verify secondary nodes can be ignored in closure and result
             let (compiledOtherNodes, _, otherOpResult) =
-                compile(node: otherNode, context: .filter) { result in
+                try compile(node: otherNode, context: .filter) { result in
                     (
                         result.primaryCompiledNodes,
                         result.secondaryCompiledNodes,
@@ -99,23 +106,23 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
 
         switch filter {
         case let .equals(otherNode):
-            return compileBinaryExpression(otherNode: otherNode) {
+            return try compileBinaryExpression(otherNode: otherNode) {
                 .equals($0, $1)
             }
 
         case let .lessThan(otherNode):
-            return compileBinaryExpression(otherNode: otherNode) {
+            return try compileBinaryExpression(otherNode: otherNode) {
                 .lessThanOrEquals($0, $1)
             }
 
         case let .greaterThan(otherNode):
-            return compileBinaryExpression(otherNode: otherNode) {
+            return try compileBinaryExpression(otherNode: otherNode) {
                 .greaterThanOrEquals($0, $1)
             }
 
         case let .conjunction(filters):
-            return filters.reduce(opResult) { opResult, filter in
-                compile(
+            return try filters.reduce(opResult) { opResult, filter in
+                try compile(
                     filter: filter,
                     compiledNode: compiledNode,
                     opResult: opResult
@@ -127,9 +134,9 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
     private func compile(
         node: Node,
         context: NodeCompilationContext,
-        continuation: (Result) -> Result
+        continuation: (Result) throws -> Result
     )
-        -> Result
+        throws -> Result
     {
         let expandedNode = backend.expand(
             node: node,
@@ -144,18 +151,18 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
         var result: Result = ([compiledNode], [], .identity)
 
         if let edge = expandedNode.edge {
-            result = compile(
+            result = try compile(
                 edge: edge,
                 compiledNode: compiledNode
             )
         }
 
-        result = continuation(result)
+        result = try continuation(result)
 
         if let filter = node.filter {
             var newOpResult = result.opResult
             for compiledNode in result.primaryCompiledNodes {
-                newOpResult = compile(
+                newOpResult = try compile(
                     filter: filter,
                     compiledNode: compiledNode,
                     opResult: newOpResult
@@ -182,10 +189,9 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
         return result
     }
 
-    // DONE
-    private func compile(edges: [Edge], compiledNode: SPARQL.Node, merge: OpResultMerger) -> Result {
-        let compiledEdges = edges.map { edge in
-            compile(edge: edge, compiledNode: compiledNode)
+    private func compile(edges: [Edge], compiledNode: SPARQL.Node, merge: OpResultMerger) throws -> Result {
+        let compiledEdges = try edges.map { edge in
+            try compile(edge: edge, compiledNode: compiledNode)
         }
         guard let firstEdge = compiledEdges.first else {
             return ([compiledNode], [], .identity)
@@ -202,10 +208,10 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
         }
     }
 
-    private func compile(edge: Edge, compiledNode: SPARQL.Node) -> Result {
+    private func compile(edge: Edge, compiledNode: SPARQL.Node) throws -> Result {
         switch edge {
         case let .outgoing(label, target):
-            let opResult = compile(
+            let opResult = try compile(
                 edgeLabel: label,
                 compiledNode: compiledNode,
                 otherNode: target,
@@ -214,7 +220,7 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
             return ([compiledNode], [], opResult)
 
         case let .incoming(source, label):
-            let opResult = compile(
+            let opResult = try compile(
                 edgeLabel: label,
                 compiledNode: compiledNode,
                 otherNode: source,
@@ -223,23 +229,22 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
             return ([compiledNode], [], opResult)
 
         case let .conjunction(edges):
-            return compile(edges: edges, compiledNode: compiledNode) {
+            return try compile(edges: edges, compiledNode: compiledNode) {
                 $0.join($1)
             }
 
         case let .disjunction(edges):
-            return compile(edges: edges, compiledNode: compiledNode) {
+            return try compile(edges: edges, compiledNode: compiledNode) {
                 $0.union($1)
             }
 
         case let .aggregate(aggregatedNode, function, distinct, groupingNode):
-            return compile(node: aggregatedNode, context: .triple) { aggregatedResult in
+            return try compile(node: aggregatedNode, context: .triple) { aggregatedResult in
 
                 var aggregations: [String: Aggregation] = [:]
                 for compiledAggregatedNode in aggregatedResult.primaryCompiledNodes {
                     guard case let .variable(variableName) = compiledNode else {
-                        // TODO:
-                        fatalError("aggregation nodes needs to be compiled to a variable")
+                        throw Error.aggregatedNodeNotCompiledToVariable
                     }
                     aggregations[variableName] = compile(
                         aggregateFunction: function,
@@ -248,7 +253,7 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
                     )
                 }
 
-                return compile(node: groupingNode, context: .triple) { groupingResult in
+                return try compile(node: groupingNode, context: .triple) { groupingResult in
 
                     let newSecondaryNodes =
                         aggregatedResult.secondaryCompiledNodes
@@ -257,10 +262,9 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
 
                     let newOpResult = aggregatedResult.opResult.join(groupingResult.opResult)
 
-                    let groupingVariables = newSecondaryNodes.map { compiledNode -> String in
+                    let groupingVariables = try newSecondaryNodes.map { compiledNode -> String in
                         guard case let .variable(variableName) = compiledNode else {
-                            // TODO:
-                            fatalError("grouping nodes needs to be compiled to a variable")
+                            throw Error.groupingNodeNotCompiledToVariable
                         }
                         return variableName
                     }
@@ -288,7 +292,7 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
         otherNode: Node,
         direction: EdgeDirection
     )
-        -> OpResult
+        throws -> OpResult
     {
         let predicate = backend.compile(
             edgeLabel: edgeLabel,
@@ -296,7 +300,7 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
         )
 
         // TODO: verify second argument in closure can be ignored
-        let (_, _, opResult) = compile(node: otherNode, context: .triple) { result in
+        let (_, _, opResult) = try compile(node: otherNode, context: .triple) { result in
 
             // TODO: verify secondary compiled nodes of result don't have to be considered for triples
 
@@ -337,22 +341,20 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
         return opResult
     }
 
-    public func compileQuery(node: Node) -> SPARQL.Query {
+    public func compileQuery(node: Node) throws -> SPARQL.Query {
 
         guard node.edge != nil else {
-            // TODO:
-            fatalError("root node needs to have edges")
+            throw Error.missingEdge
         }
 
         let (compiledPrimaryNodes, compiledSecondaryNodes, opResult) =
-            compile(node: node, context: .triple) { $0 }
+            try compile(node: node, context: .triple) { $0 }
 
         let compiledNodes = compiledPrimaryNodes.union(compiledSecondaryNodes)
 
-        let variableNames: [String] = compiledNodes.map { compiledNode in
+        let variableNames: [String] = try compiledNodes.map { compiledNode in
             guard case let .variable(variableName) = compiledNode else {
-                // TODO:
-                fatalError("root nodes needs to be compiled to a variable")
+                throw Error.finalNodeNotCompiledToVariable
             }
             return variableName
         }
