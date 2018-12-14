@@ -23,9 +23,9 @@ public protocol SPARQLBackend {
 
     func prepare(leftExpression: SPARQL.Expression, otherNode: Node) -> SPARQL.Expression
 
-    func prepare(op: SPARQL.Op, variable: String, env: Env) -> SPARQL.Op
+    func prepare(op: SPARQL.Op, variables: [String], env: Env) -> SPARQL.Op
 
-    func additionalResultVariables(variable: String, env: Env) -> [String]
+    func additionalResultVariables(variables: [String], env: Env) -> [String]
 }
 
 extension SPARQLBackend {
@@ -38,11 +38,11 @@ extension SPARQLBackend {
         return leftExpression
     }
 
-    public func prepare(op: SPARQL.Op, variable: String, env: Env) -> SPARQL.Op {
+    public func prepare(op: SPARQL.Op, variables: [String], env: Env) -> SPARQL.Op {
         return op
     }
 
-    public func additionalResultVariables(variable: String, env: Env) -> [String] {
+    public func additionalResultVariables(variables: [String], env: Env) -> [String] {
         return []
     }
 }
