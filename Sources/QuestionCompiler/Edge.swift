@@ -1,7 +1,6 @@
 
 public indirect enum Edge<E, N>: Hashable
-    where E: EdgeLabel,
-        N: NodeLabel
+    where E: EdgeLabel, N: NodeLabel
 {
     public typealias Node = GraphNode<N, E>
     public typealias Edge = GraphEdge<E, N>

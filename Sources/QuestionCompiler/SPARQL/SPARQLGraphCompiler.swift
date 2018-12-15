@@ -19,8 +19,8 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
     }
 
     private typealias Result = (
-        primaryCompiledNodes: Set<SPARQL.Node>,
-        secondaryCompiledNodes: Set<SPARQL.Node>,
+        primaryCompiledNodes: OrderedSet<SPARQL.Node>,
+        secondaryCompiledNodes: OrderedSet<SPARQL.Node>,
         opResult: OpResult
     )
 
@@ -92,7 +92,7 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
                 otherNode: otherNode
             )
 
-            let filterOp = compiledOtherNodes.reduce(otherOpResult.op) { op, compiledOtherNode in
+            let filterOp = compiledOtherNodes.elements.reduce(otherOpResult.op) { op, compiledOtherNode in
                 let rightExpression = Expression.node(compiledOtherNode)
                 let finalExpression = merge(leftExpression, rightExpression)
                 return .filter(finalExpression, op)
@@ -160,14 +160,15 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
         result = try continuation(result)
 
         if let filter = node.filter {
-            var newOpResult = result.opResult
-            for compiledNode in result.primaryCompiledNodes {
-                newOpResult = try compile(
-                    filter: filter,
-                    compiledNode: compiledNode,
-                    opResult: newOpResult
-                )
-            }
+            let newOpResult = try result.primaryCompiledNodes.elements
+                .reduce(result.opResult) { opResult, compiledNode in
+                    try compile(
+                        filter: filter,
+                        compiledNode: compiledNode,
+                        opResult: opResult
+                    )
+                }
+
             result = (
                 result.primaryCompiledNodes,
                 result.secondaryCompiledNodes,
@@ -177,7 +178,7 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
 
         if let order = node.order {
             let compiledOrder = compile(order: order)
-            for compiledNode in result.primaryCompiledNodes {
+            for compiledNode in result.primaryCompiledNodes.elements {
                 let orderComparator = SPARQL.OrderComparator(
                     order: compiledOrder,
                     expression: .node(compiledNode)
@@ -201,8 +202,8 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
             let (resultPrimaryNodes, resultSecondaryNodes, resultOpResult) = result
             let (nextPrimaryNodes, nextSecondaryNodes, nextOpResult) = next
             return (
-                resultPrimaryNodes.union(nextPrimaryNodes),
-                resultSecondaryNodes.union(nextSecondaryNodes),
+                resultPrimaryNodes.union(nextPrimaryNodes.elements),
+                resultSecondaryNodes.union(nextSecondaryNodes.elements),
                 merge(resultOpResult, nextOpResult)
             )
         }
@@ -242,7 +243,7 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
             return try compile(node: aggregatedNode, context: .triple) { aggregatedResult in
 
                 var aggregations: [String: Aggregation] = [:]
-                for compiledAggregatedNode in aggregatedResult.primaryCompiledNodes {
+                for compiledAggregatedNode in aggregatedResult.primaryCompiledNodes.elements {
                     guard case let .variable(variableName) = compiledNode else {
                         throw Error.aggregatedNodeNotCompiledToVariable
                     }
@@ -257,12 +258,12 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
 
                     let newSecondaryNodes =
                         aggregatedResult.secondaryCompiledNodes
-                            .union(groupingResult.primaryCompiledNodes)
-                            .union(groupingResult.secondaryCompiledNodes)
+                            .union(groupingResult.primaryCompiledNodes.elements)
+                            .union(groupingResult.secondaryCompiledNodes.elements)
 
                     let newOpResult = aggregatedResult.opResult.join(groupingResult.opResult)
 
-                    let groupingVariables = try newSecondaryNodes.map { compiledNode -> String in
+                    let groupingVariables = try newSecondaryNodes.elements.map { compiledNode -> String in
                         guard case let .variable(variableName) = compiledNode else {
                             throw Error.groupingNodeNotCompiledToVariable
                         }
@@ -299,7 +300,7 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
             env: environment
         )
 
-        // TODO: verify second argument in closure can be ignored
+        // TODO: verify compiled nodes of result can be ignored
         let (_, _, opResult) = try compile(node: otherNode, context: .triple) { result in
 
             // TODO: verify secondary compiled nodes of result don't have to be considered for triples
@@ -308,7 +309,7 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
 
             switch direction {
             case .forward:
-                triples = result.primaryCompiledNodes.map { compiledOtherNode in
+                triples = result.primaryCompiledNodes.elements.map { compiledOtherNode in
                     Triple(
                         subject: compiledNode,
                         predicate: predicate,
@@ -317,7 +318,7 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
                 }
 
             case .backward:
-                triples = result.primaryCompiledNodes.map { compiledOtherNode in
+                triples = result.primaryCompiledNodes.elements.map { compiledOtherNode in
                     Triple(
                         subject: compiledOtherNode,
                         predicate: predicate,
@@ -350,9 +351,9 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
         let (compiledPrimaryNodes, compiledSecondaryNodes, opResult) =
             try compile(node: node, context: .triple) { $0 }
 
-        let compiledNodes = compiledPrimaryNodes.union(compiledSecondaryNodes)
+        let compiledNodes = compiledPrimaryNodes.union(compiledSecondaryNodes.elements)
 
-        let variableNames: [String] = try compiledNodes.map { compiledNode in
+        let variableNames: [String] = try compiledNodes.elements.map { compiledNode in
             guard case let .variable(variableName) = compiledNode else {
                 throw Error.finalNodeNotCompiledToVariable
             }

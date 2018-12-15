@@ -538,7 +538,7 @@ final class SPARQLGraphCompilerTests: XCTestCase {
             .ordered(.descending)
 
         let expected = """
-            SELECT DISTINCT ?1 ?2 {
+            SELECT DISTINCT ?2 ?1 {
               {
                 SELECT DISTINCT ?1 (COUNT(DISTINCT ?0) AS ?2) {
                   ?0 <isA> <planet> .
@@ -554,6 +554,6 @@ final class SPARQLGraphCompilerTests: XCTestCase {
 
             """
         let actual = try compileToSPARQL(node: graph, env: env)
-        diffedAssertEqual(actual, expected)
+        diffedAssertEqual(expected, actual)
     }
 }

@@ -1,7 +1,6 @@
 
 public struct Node<N, E>: Hashable
-    where N: NodeLabel,
-        E: EdgeLabel
+    where N: NodeLabel, E: EdgeLabel
 {
     public typealias Node = GraphNode<N, E>
     public typealias Edge = GraphEdge<E, N>

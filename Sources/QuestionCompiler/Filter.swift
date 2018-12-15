@@ -2,8 +2,7 @@
 import QuestionParser
 
 public indirect enum Filter<N, E>: Hashable
-    where N: NodeLabel,
-        E: EdgeLabel
+    where N: NodeLabel, E: EdgeLabel
 {
     public typealias Node = GraphNode<N, E>
     public typealias Filter = GraphFilter<N, E>
@@ -13,7 +12,7 @@ public indirect enum Filter<N, E>: Hashable
     case lessThan(Node)
     case greaterThan(Node)
 
-    func and(_ filter: Filter) -> Filter {
+    public func and(_ filter: Filter) -> Filter {
         switch (self, filter) {
         case let (.conjunction(filters), .conjunction(otherFilters)):
             return .conjunction(filters + otherFilters)
