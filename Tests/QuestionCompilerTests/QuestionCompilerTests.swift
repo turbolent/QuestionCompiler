@@ -1,10 +1,9 @@
-
-import XCTest
 import DiffedAssertEqual
 import ParserCombinators
-import QuestionParser
 import QuestionCompiler
+import QuestionParser
 import TestOntology
+import XCTest
 
 final class QuestionCompilerTests: XCTestCase {
 
@@ -562,7 +561,6 @@ final class QuestionCompilerTests: XCTestCase {
         diffedAssertEqual([expected], result)
     }
 
-
     func testQ17() throws {
         let compiler = newCompiler()
         let result = try compiler.compile(
@@ -578,7 +576,7 @@ final class QuestionCompilerTests: XCTestCase {
                             .named([
                                 t("Bill", "NNP", "bill"),
                                 t("Clinton", "NNP", "clinton")
-                                ]),
+                            ]),
                             token: t("'s", "POS", "'s")
                         )
                     )

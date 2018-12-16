@@ -1,6 +1,5 @@
-
-import QuestionParser
 import QuestionCompiler
+import QuestionParser
 import SPARQL
 import SPARQLCompiler
 import TestOntology

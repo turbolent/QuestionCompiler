@@ -1,12 +1,11 @@
-
-import XCTest
 import DiffedAssertEqual
 import ParserCombinators
+import QuestionCompiler
 import QuestionParser
 import SPARQL
-import QuestionCompiler
 import SPARQLCompiler
 import TestOntology
+import XCTest
 
 final class SPARQLCompilerTests: XCTestCase {
 

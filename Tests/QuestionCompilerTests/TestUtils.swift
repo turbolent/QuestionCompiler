@@ -1,6 +1,5 @@
-
-import QuestionParser
 import QuestionCompiler
+import QuestionParser
 import TestOntology
 
 func t(_ word: String, _ tag: String, _ lemma: String) -> Token {
