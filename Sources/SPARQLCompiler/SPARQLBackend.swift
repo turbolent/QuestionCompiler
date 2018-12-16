@@ -20,7 +20,7 @@ public protocol SPARQLBackend {
     //// optional hooks
 
     /// Expand the given node into another, possibly more complex node, if needed
-    func expand(node: Node, context: NodeCompilationContext, env: Env) -> Node
+    func expand(node: Node, context: NodeContext, env: Env) -> Node
 
     func prepare(leftExpression: SPARQL.Expression, otherNode: Node) -> SPARQL.Expression
 
@@ -31,7 +31,7 @@ public protocol SPARQLBackend {
 
 extension SPARQLBackend {
 
-    public func expand(node: Node, context: NodeCompilationContext, env: Env) -> Node {
+    public func expand(node: Node, context: NodeContext, env: Env) -> Node {
         return node
     }
 

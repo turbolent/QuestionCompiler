@@ -1,6 +1,9 @@
 
 import SPARQL
 
+public typealias OpResultMerger =
+    (OpResult, OpResult) -> OpResult
+
 public struct OpResult {
 
     public static let identity = OpResult(
@@ -13,7 +16,7 @@ public struct OpResult {
 
     public init(
         op: SPARQL.Op,
-        orderComparators: [SPARQL.OrderComparator]
+        orderComparators: [SPARQL.OrderComparator] = []
     ) {
         self.op = op
         self.orderComparators = orderComparators
