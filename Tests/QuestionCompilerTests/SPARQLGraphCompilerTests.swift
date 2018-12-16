@@ -11,7 +11,7 @@ final class SPARQLGraphCompilerTests: XCTestCase {
     private func compileToSPARQL(node: TestNode, env: TestEnvironment) throws -> String {
         let backend = TestSPARQLBackend()
         let compiler = SPARQLGraphCompiler(environment: env, backend: backend)
-        let query = compiler.compileQuery(node: node)
+        let query = try compiler.compileQuery(node: node)
         let context = Context(prefixMapping: [:])
         return try query.serializeToSPARQL(depth: 0, context: context)
     }
@@ -266,7 +266,7 @@ final class SPARQLGraphCompilerTests: XCTestCase {
               ?0 <hasDateOfBirth> ?3 .
               ?1 <hasDateOfBirth> ?2 .
               ?1 <hasName> "Obama" .
-              FILTER (?3 < ?2)
+              FILTER (?3 <= ?2)
             }
 
             """
@@ -291,7 +291,7 @@ final class SPARQLGraphCompilerTests: XCTestCase {
             SELECT DISTINCT ?0 {
               ?0 <isA> <president> .
               ?0 <hasDateOfBirth> ?1 .
-              FILTER (?1 < 1900.0)
+              FILTER (?1 <= 1900.0)
             }
 
             """
@@ -508,6 +508,48 @@ final class SPARQLGraphCompilerTests: XCTestCase {
               ?2 <hasPopulation> ?1 .
             }
             ORDER BY DESC(?1)
+
+            """
+        let actual = try compileToSPARQL(node: graph, env: env)
+        diffedAssertEqual(expected, actual)
+    }
+
+    func testQ18() throws {
+        let env = TestEnvironment()
+
+        let planet = env
+            .newNode()
+            .isA(TestClasses.planet)
+
+        let person = env
+            .newNode()
+            .isA(TestClasses.person)
+            .outgoing(.discovered, planet)
+
+        let graph = env
+            .newNode()
+            .aggregating(
+                planet,
+                function: .count,
+                distinct: true,
+                grouping: person
+            )
+            .filtered(.greaterThan(.number(3)))
+            .ordered(.descending)
+
+        let expected = """
+            SELECT DISTINCT ?2 ?1 {
+              {
+                SELECT DISTINCT ?1 (COUNT(DISTINCT ?0) AS ?2) {
+                  ?0 <isA> <planet> .
+                  ?1 <isA> <person> .
+                  ?1 <discovered> ?0 .
+                }
+                GROUP BY ?1
+              }
+              FILTER (?2 >= 3.0)
+            }
+            ORDER BY DESC(?2)
 
             """
         let actual = try compileToSPARQL(node: graph, env: env)

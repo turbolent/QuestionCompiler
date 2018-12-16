@@ -1,2 +1,2 @@
 
-public protocol EdgeLabel: Equatable, Encodable {}
+public protocol EdgeLabel: Hashable, Encodable {}

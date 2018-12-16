@@ -1,7 +1,6 @@
 
-public struct Node<N, E>: Equatable
-    where N: NodeLabel,
-        E: EdgeLabel
+public struct Node<N, E>: Hashable
+    where N: NodeLabel, E: EdgeLabel
 {
     public typealias Node = GraphNode<N, E>
     public typealias Edge = GraphEdge<E, N>
@@ -54,6 +53,21 @@ public struct Node<N, E>: Equatable
         var result = self
         result.order = order
         return result
+    }
+
+    public func aggregating(
+        _ node: Node,
+        function: AggregateFunction,
+        distinct: Bool,
+        grouping: Node
+    ) -> Node {
+        let aggregate: Edge = .aggregate(
+            node,
+            function: function,
+            distinct: distinct,
+            grouping: grouping
+        )
+        return and(aggregate)
     }
 }
 

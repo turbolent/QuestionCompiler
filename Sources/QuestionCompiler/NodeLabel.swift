@@ -1,1 +1,1 @@
-public protocol NodeLabel: Equatable, Encodable {}
+public protocol NodeLabel: Hashable, Encodable {}

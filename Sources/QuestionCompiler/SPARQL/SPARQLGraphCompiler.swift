@@ -11,21 +11,58 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
     public typealias Edge = GraphEdge<E, N>
     public typealias Filter = GraphFilter<N, E>
 
-    public typealias OpResultMerger =
+    public enum Error: Swift.Error {
+        case missingEdge
+        case finalNodeNotCompiledToVariable
+        case aggregatedNodeNotCompiledToVariable
+        case groupingNodeNotCompiledToVariable
+    }
+
+    private typealias Result = (
+        primaryCompiledNodes: OrderedSet<SPARQL.Node>,
+        secondaryCompiledNodes: OrderedSet<SPARQL.Node>,
+        opResult: OpResult
+    )
+
+    private typealias OpResultMerger =
         (OpResult, OpResult) -> OpResult
 
-    public typealias ExpressionMerger =
-        (SPARQL.Expression, SPARQL.Expression) -> SPARQL.Expression
-
-    public let environment: Env
-    public let backend: Backend
+    private let environment: Env
+    private let backend: Backend
+    private var results: [Node: Result] = [:]
 
     public init(environment: Env, backend: Backend) {
         self.environment = environment
         self.backend = backend
     }
 
-    public func compile(order: Order) -> SPARQL.Order {
+    private func compile(
+        aggregateFunction: AggregateFunction,
+        distinct: Bool,
+        compiledNode: SPARQL.Node
+    )
+        -> SPARQL.Aggregation
+    {
+        let expression: Expression = .node(compiledNode)
+        switch aggregateFunction {
+        case .avg:
+            return .avg(expression, distinct: distinct)
+        case .count:
+            return .count(expression, distinct: distinct)
+        case .min:
+            return .min(expression, distinct: distinct)
+        case .max:
+            return .max(expression, distinct: distinct)
+        case .sample:
+            return .sample(expression, distinct: distinct)
+        case .sum:
+            return .sum(expression, distinct: distinct)
+        case .groupConcat:
+            return .groupConcat(expression, distinct: distinct, separator: "\u{001F}")
+        }
+    }
+
+    private func compile(order: Order) -> SPARQL.Order {
         switch order {
         case .ascending:
             return .ascending
@@ -34,24 +71,33 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
         }
     }
 
-    public func compile(filter: Filter, compiledNode: SPARQL.Node, opResult: OpResult) -> OpResult {
+    private func compile(filter: Filter, compiledNode: SPARQL.Node, opResult: OpResult) throws -> OpResult {
 
-        func compileBinaryExpression(otherNode: Node, merge: ExpressionMerger) -> OpResult {
+        typealias ExpressionMerger =
+            (SPARQL.Expression, SPARQL.Expression) -> SPARQL.Expression
 
-            let (compiledOtherNode, otherOpResult) =
-                compile(node: otherNode, context: .filter) {
-                    (compiledOtherNode, otherOpResult) in
+        func compileBinaryExpression(otherNode: Node, merge: ExpressionMerger) throws -> OpResult {
 
-                    opResult.join(otherOpResult)
+            // TODO: verify secondary nodes can be ignored in closure and result
+            let (compiledOtherNodes, _, otherOpResult) =
+                try compile(node: otherNode, context: .filter) { result in
+                    (
+                        result.primaryCompiledNodes,
+                        result.secondaryCompiledNodes,
+                        opResult.join(result.opResult)
+                    )
                 }
 
             let leftExpression = backend.prepare(
                 leftExpression: .node(compiledNode),
                 otherNode: otherNode
             )
-            let rightExpression = Expression.node(compiledOtherNode)
-            let finalExpression = merge(leftExpression, rightExpression)
-            let filterOp = Op.filter(finalExpression, otherOpResult.op)
+
+            let filterOp = compiledOtherNodes.elements.reduce(otherOpResult.op) { op, compiledOtherNode in
+                let rightExpression = Expression.node(compiledOtherNode)
+                let finalExpression = merge(leftExpression, rightExpression)
+                return .filter(finalExpression, op)
+            }
 
             return OpResult(
                 op: filterOp,
@@ -61,38 +107,42 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
 
         switch filter {
         case let .equals(otherNode):
-            return compileBinaryExpression(otherNode: otherNode) {
+            return try compileBinaryExpression(otherNode: otherNode) {
                 .equals($0, $1)
             }
 
         case let .lessThan(otherNode):
-            return compileBinaryExpression(otherNode: otherNode) {
-                .lessThan($0, $1)
+            return try compileBinaryExpression(otherNode: otherNode) {
+                .lessThanOrEquals($0, $1)
             }
 
         case let .greaterThan(otherNode):
-            return compileBinaryExpression(otherNode: otherNode) {
-                .greaterThan($0, $1)
+            return try compileBinaryExpression(otherNode: otherNode) {
+                .greaterThanOrEquals($0, $1)
             }
 
         case let .conjunction(filters):
-            return filters.reduce(opResult) {
-                compile(
-                    filter: $1,
+            return try filters.reduce(opResult) { opResult, filter in
+                try compile(
+                    filter: filter,
                     compiledNode: compiledNode,
-                    opResult: $0
+                    opResult: opResult
                 )
             }
         }
     }
 
-    public func compile(
+    private func compile(
         node: Node,
         context: NodeCompilationContext,
-        continuation: (SPARQL.Node, OpResult) -> OpResult
+        continuation: (Result) throws -> Result
     )
-        -> (SPARQL.Node, OpResult)
+        throws -> Result
     {
+        if let (primaryCompiledNodes, secondaryCompiledNodes, _) = results[node] {
+            return (primaryCompiledNodes, secondaryCompiledNodes, .identity)
+        }
+
         let expandedNode = backend.expand(
             node: node,
             context: context,
@@ -103,160 +153,258 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
             env: environment
         )
 
-        var opResult: OpResult = .identity
+        var result: Result = ([compiledNode], [], .identity)
 
         if let edge = expandedNode.edge {
-            opResult = compile(
+            result = try compile(
                 edge: edge,
                 compiledNode: compiledNode
             )
         }
 
-        opResult = continuation(
-            compiledNode,
-            opResult
-        )
+        result = try continuation(result)
 
         if let filter = node.filter {
-            opResult = compile(
-                filter: filter,
-                compiledNode: compiledNode,
-                opResult: opResult
+            let newOpResult = try result.primaryCompiledNodes.elements
+                .reduce(result.opResult) { opResult, compiledNode in
+                    try compile(
+                        filter: filter,
+                        compiledNode: compiledNode,
+                        opResult: opResult
+                    )
+                }
+
+            result = (
+                result.primaryCompiledNodes,
+                result.secondaryCompiledNodes,
+                newOpResult
             )
         }
 
         if let order = node.order {
             let compiledOrder = compile(order: order)
-            let orderComparator = SPARQL.OrderComparator(
-                order: compiledOrder,
-                expression: .node(compiledNode)
-            )
-            opResult.orderComparators.append(orderComparator)
+            for compiledNode in result.primaryCompiledNodes.elements {
+                let orderComparator = SPARQL.OrderComparator(
+                    order: compiledOrder,
+                    expression: .node(compiledNode)
+                )
+                result.opResult.orderComparators.append(orderComparator)
+            }
         }
 
-        return (compiledNode, opResult)
+        results[node] = result
+
+        return result
     }
 
-    func compile(edges: [Edge], compiledNode: SPARQL.Node, merge: OpResultMerger) -> OpResult {
-        let compiledEdges = edges.map { edge in
-            compile(edge: edge, compiledNode: compiledNode)
+    private func compile(edges: [Edge], compiledNode: SPARQL.Node, merge: OpResultMerger) throws -> Result {
+        let compiledEdges = try edges.map { edge in
+            try compile(edge: edge, compiledNode: compiledNode)
         }
         guard let firstEdge = compiledEdges.first else {
-            return .identity
+            return ([compiledNode], [], .identity)
         }
         let remainingEdges = compiledEdges.dropFirst()
-        return remainingEdges.reduce(firstEdge, merge)
+        return remainingEdges.reduce(firstEdge) { result, next in
+            let (resultPrimaryNodes, resultSecondaryNodes, resultOpResult) = result
+            let (nextPrimaryNodes, nextSecondaryNodes, nextOpResult) = next
+            return (
+                resultPrimaryNodes.union(nextPrimaryNodes.elements),
+                resultSecondaryNodes.union(nextSecondaryNodes.elements),
+                merge(resultOpResult, nextOpResult)
+            )
+        }
     }
 
-    func compile(edge: Edge, compiledNode: SPARQL.Node) -> OpResult {
+    private func compile(edge: Edge, compiledNode: SPARQL.Node) throws -> Result {
         switch edge {
         case let .outgoing(label, target):
-            return compile(
+            let opResult = try compile(
                 edgeLabel: label,
                 compiledNode: compiledNode,
                 otherNode: target,
                 direction: .forward
             )
+            return ([compiledNode], [], opResult)
 
         case let .incoming(source, label):
-            return compile(
+            let opResult = try compile(
                 edgeLabel: label,
                 compiledNode: compiledNode,
                 otherNode: source,
                 direction: .backward
             )
+            return ([compiledNode], [], opResult)
 
         case let .conjunction(edges):
-            return compile(edges: edges, compiledNode: compiledNode) {
+            return try compile(edges: edges, compiledNode: compiledNode) {
                 $0.join($1)
             }
 
         case let .disjunction(edges):
-            return compile(edges: edges, compiledNode: compiledNode) {
+            return try compile(edges: edges, compiledNode: compiledNode) {
                 $0.union($1)
+            }
+
+        case let .aggregate(aggregatedNode, function, distinct, groupingNode):
+            return try compile(node: aggregatedNode, context: .triple) { aggregatedResult in
+
+                var aggregations: [String: Aggregation] = [:]
+                for compiledAggregatedNode in aggregatedResult.primaryCompiledNodes.elements {
+                    guard case let .variable(variableName) = compiledNode else {
+                        throw Error.aggregatedNodeNotCompiledToVariable
+                    }
+                    aggregations[variableName] = compile(
+                        aggregateFunction: function,
+                        distinct: distinct,
+                        compiledNode: compiledAggregatedNode
+                    )
+                }
+
+                return try compile(node: groupingNode, context: .triple) { groupingResult in
+
+                    let newSecondaryNodes =
+                        aggregatedResult.secondaryCompiledNodes
+                            .union(groupingResult.primaryCompiledNodes.elements)
+                            .union(groupingResult.secondaryCompiledNodes.elements)
+
+                    let newOpResult = aggregatedResult.opResult.join(groupingResult.opResult)
+
+                    let groupingVariables = try newSecondaryNodes.elements.map { compiledNode -> String in
+                        guard case let .variable(variableName) = compiledNode else {
+                            throw Error.groupingNodeNotCompiledToVariable
+                        }
+                        return variableName
+                    }
+
+                    return (
+                        [compiledNode],
+                        newSecondaryNodes,
+                        OpResult(
+                            op: distinctProjectOrderBy(
+                                op: .group(newOpResult.op, groupingVariables, aggregations),
+                                variables: groupingVariables,
+                                orderComparators: newOpResult.orderComparators
+                            ),
+                            orderComparators: []
+                        )
+                    )
+                }
             }
         }
     }
 
-    public func compile(
+    private func compile(
         edgeLabel: E,
         compiledNode: SPARQL.Node,
         otherNode: Node,
         direction: EdgeDirection
     )
-        -> OpResult
+        throws -> OpResult
     {
         let predicate = backend.compile(
             edgeLabel: edgeLabel,
             env: environment
         )
 
-        let (_, opResult) = compile(node: otherNode, context: .triple) {
-            (compiledOtherNode, otherOpResult) in
+        // TODO: verify compiled nodes of result can be ignored
+        let (_, _, opResult) = try compile(node: otherNode, context: .triple) { result in
 
-            let triple: Triple
+            // TODO: verify secondary compiled nodes of result don't have to be considered for triples
+
+            let triples: [Triple]
+
             switch direction {
             case .forward:
-                triple = Triple(
-                    subject: compiledNode,
-                    predicate: predicate,
-                    object: compiledOtherNode
-                )
+                triples = result.primaryCompiledNodes.elements.map { compiledOtherNode in
+                    Triple(
+                        subject: compiledNode,
+                        predicate: predicate,
+                        object: compiledOtherNode
+                    )
+                }
 
             case .backward:
-                triple = Triple(
-                    subject: compiledOtherNode,
-                    predicate: predicate,
-                    object: compiledNode
-                )
+                triples = result.primaryCompiledNodes.elements.map { compiledOtherNode in
+                    Triple(
+                        subject: compiledOtherNode,
+                        predicate: predicate,
+                        object: compiledNode
+                    )
+                }
             }
 
-            let result = OpResult(
-                op: .bgp([triple]),
+            let opResult = OpResult(
+                op: .bgp(triples),
                 orderComparators: []
             )
 
-            return result.join(otherOpResult)
+            return (
+                result.primaryCompiledNodes,
+                result.secondaryCompiledNodes,
+                opResult.join(result.opResult)
+            )
         }
 
         return opResult
     }
 
-    public func compileQuery(node: Node) -> SPARQL.Query {
+    public func compileQuery(node: Node) throws -> SPARQL.Query {
 
         guard node.edge != nil else {
-            // TODO:
-            fatalError("root node needs to have edges")
+            throw Error.missingEdge
         }
 
-        let (compiledNode, opResult) =
-            compile(node: node, context: .triple) { (_, result) in result }
+        results = [:]
 
-        guard case let .variable(variableName) = compiledNode else {
-            // TODO:
-            fatalError("root node needs to be compiled to a variable")
+        let (compiledPrimaryNodes, compiledSecondaryNodes, opResult) =
+            try compile(node: node, context: .triple) { $0 }
+
+        let compiledNodes = compiledPrimaryNodes.union(compiledSecondaryNodes.elements)
+
+        let variableNames: [String] = try compiledNodes.elements.map { compiledNode in
+            guard case let .variable(variableName) = compiledNode else {
+                throw Error.finalNodeNotCompiledToVariable
+            }
+            return variableName
         }
 
-        let preparedOp = backend.prepare(
-            op: opResult.op,
-            variable: variableName,
-            env: environment
-        )
-        let variables = [variableName] +
+        let preparedOp =
+            backend.prepare(
+                op: opResult.op,
+                variables: variableNames,
+                env: environment
+            )
+
+        let variables = variableNames +
             backend.additionalResultVariables(
-                variable: variableName,
+                variables: variableNames,
                 env: environment
             )
 
         // TODO: optimize op
         return Query(op:
-            .distinct(
-                .project(
-                    variables,
-                    .orderBy(
-                        preparedOp,
-                        opResult.orderComparators
-                    )
+            distinctProjectOrderBy(
+                op: preparedOp,
+                variables: variables,
+                orderComparators: opResult.orderComparators
+            )
+        )
+    }
+
+    private func distinctProjectOrderBy(
+        op: Op,
+        variables: [String],
+        orderComparators: [SPARQL.OrderComparator]
+    )
+        -> Op
+    {
+        return .distinct(
+            .project(
+                variables,
+                .orderBy(
+                    op,
+                    orderComparators
                 )
             )
         )

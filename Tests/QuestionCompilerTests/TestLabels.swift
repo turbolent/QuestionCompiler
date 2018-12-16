@@ -23,6 +23,7 @@ struct TestClasses {
     static let president = TestNode(label: .id("president"))
     static let album = TestNode(label: .id("album"))
     static let woman = TestNode(label: .id("woman"))
+    static let planet = TestNode(label: .id("planet"))
 
     private init() {}
 }
@@ -45,4 +46,5 @@ struct TestEdgeLabel: EdgeLabel {
     static let attends = TestEdgeLabel(name: "attends")
     static let hasPerformer = TestEdgeLabel(name: "hasPerformer")
     static let hasPopulation = TestEdgeLabel(name: "hasPopulation")
+    static let discovered = TestEdgeLabel(name: "discovered")
 }
