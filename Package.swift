@@ -21,11 +21,14 @@ let package = Package(
         .testTarget(
             name: "QuestionCompilerTests",
             dependencies: ["QuestionCompiler", "SPARQLCompiler", "DiffedAssertEqual", "TestOntology"]),
-        .testTarget(
+        .target(
             name: "TestOntology",
             dependencies: ["QuestionCompiler"]),
         .target(
             name: "SPARQLCompiler",
             dependencies: ["QuestionCompiler", "SPARQL"]),
+        .testTarget(
+            name: "SPARQLCompilerTests",
+            dependencies: ["QuestionCompiler", "SPARQLCompiler", "DiffedAssertEqual", "TestOntology"]),
     ]
 )

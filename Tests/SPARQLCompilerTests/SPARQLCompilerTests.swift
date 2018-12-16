@@ -4,8 +4,8 @@ import DiffedAssertEqual
 import ParserCombinators
 import QuestionParser
 import SPARQL
-@testable import QuestionCompiler
-@testable import SPARQLCompiler
+import QuestionCompiler
+import SPARQLCompiler
 import TestOntology
 
 final class SPARQLCompilerTests: XCTestCase {
