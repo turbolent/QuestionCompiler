@@ -27,11 +27,9 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
     private typealias OpResultMerger =
         (OpResult, OpResult) -> OpResult
 
-    private typealias ExpressionMerger =
-        (SPARQL.Expression, SPARQL.Expression) -> SPARQL.Expression
-
     private let environment: Env
     private let backend: Backend
+    private var results: [Node: Result] = [:]
 
     public init(environment: Env, backend: Backend) {
         self.environment = environment
@@ -74,6 +72,9 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
     }
 
     private func compile(filter: Filter, compiledNode: SPARQL.Node, opResult: OpResult) throws -> OpResult {
+
+        typealias ExpressionMerger =
+            (SPARQL.Expression, SPARQL.Expression) -> SPARQL.Expression
 
         func compileBinaryExpression(otherNode: Node, merge: ExpressionMerger) throws -> OpResult {
 
@@ -138,6 +139,10 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
     )
         throws -> Result
     {
+        if let (primaryCompiledNodes, secondaryCompiledNodes, _) = results[node] {
+            return (primaryCompiledNodes, secondaryCompiledNodes, .identity)
+        }
+
         let expandedNode = backend.expand(
             node: node,
             context: context,
@@ -186,6 +191,8 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
                 result.opResult.orderComparators.append(orderComparator)
             }
         }
+
+        results[node] = result
 
         return result
     }
@@ -347,6 +354,8 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
         guard node.edge != nil else {
             throw Error.missingEdge
         }
+
+        results = [:]
 
         let (compiledPrimaryNodes, compiledSecondaryNodes, opResult) =
             try compile(node: node, context: .triple) { $0 }

@@ -544,7 +544,6 @@ final class SPARQLGraphCompilerTests: XCTestCase {
                   ?0 <isA> <planet> .
                   ?1 <isA> <person> .
                   ?1 <discovered> ?0 .
-                  ?0 <isA> <planet> .
                 }
                 GROUP BY ?1
               }
