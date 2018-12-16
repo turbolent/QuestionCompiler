@@ -1,6 +1,6 @@
 
-import QuestionParser
 import QuestionCompiler
+import QuestionParser
 
 public class TestOntology: Ontology {
     public typealias N = TestNodeLabel
@@ -10,7 +10,7 @@ public class TestOntology: Ontology {
     public init() {}
 
     public func makePersonEdge(
-        env: TestEnvironment
+        env _: TestEnvironment
     ) throws -> TestOntology.Edge {
         return .outgoing(.isA, TestClasses.person)
     }
@@ -18,8 +18,8 @@ public class TestOntology: Ontology {
     public func makeNamedPropertyEdge(
         name: [Token],
         node: TestOntology.Node,
-        subject: Subject,
-        env: TestEnvironment
+        subject _: Subject,
+        env _: TestEnvironment
     ) throws -> TestOntology.Edge {
         let lemmas = name.map { $0.lemma }
         switch lemmas {
@@ -33,8 +33,8 @@ public class TestOntology: Ontology {
     public func makeInversePropertyEdge(
         name: [Token],
         node: TestOntology.Node,
-        context: EdgeContext,
-        env: TestEnvironment
+        context _: EdgeContext,
+        env _: TestEnvironment
     ) throws -> TestOntology.Edge {
         let lemmas = name.map { $0.lemma }
         switch lemmas {
@@ -51,7 +51,7 @@ public class TestOntology: Ontology {
         name: [Token],
         node: TestOntology.Node,
         context: EdgeContext,
-        env: TestEnvironment
+        env _: TestEnvironment
     ) throws -> TestOntology.Edge {
         let lemmas = (name + context.filter)
             .map { $0.lemma }
@@ -117,9 +117,8 @@ public class TestOntology: Ontology {
     public func makeRelationshipEdge(
         name: [Token],
         node: TestOntology.Node,
-        env: TestEnvironment
+        env _: TestEnvironment
     ) throws -> TestOntology.Edge {
-
         let lemmas = name.filter { $0.tag != "DT" }.map { $0.lemma }
         switch lemmas {
         case ["child"]:
@@ -164,10 +163,9 @@ public class TestOntology: Ontology {
 
     public func makeValueNode(
         name: [Token],
-        filter: [Token],
+        filter _: [Token],
         env: TestEnvironment
     ) throws -> TestOntology.Node {
-
         if let `class` = getClass(name) {
             return env.newNode()
                 .outgoing(.isA, `class`)
@@ -184,8 +182,8 @@ public class TestOntology: Ontology {
     public func makeNumberNode(
         number: [Token],
         unit: [Token],
-        filter: [Token],
-        env: TestEnvironment
+        filter _: [Token],
+        env _: TestEnvironment
     ) throws -> TestOntology.Node {
         let numberString = number.map { $0.lemma }.joined(separator: " ")
         let unitString = unit.isEmpty

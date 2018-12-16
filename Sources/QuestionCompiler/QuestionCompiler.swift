@@ -19,8 +19,8 @@ public final class QuestionCompiler<N, E, Env, Ont>
     public typealias Edge = GraphEdge<E, N>
 
     public typealias NodeFactory = (Node, [Token]) throws -> Node
-    public typealias EdgeContextFactory = (Subject) throws-> EdgeContext
-    public typealias EdgeFactory = (Node, EdgeContextFactory) throws-> Edge
+    public typealias EdgeContextFactory = (Subject) throws -> EdgeContext
+    public typealias EdgeFactory = (Node, EdgeContextFactory) throws -> Edge
 
     public let environment: Env
     public let ontology: Ont
@@ -32,18 +32,18 @@ public final class QuestionCompiler<N, E, Env, Ont>
 
     public func compile(question: ListQuestion) throws -> [Node] {
         switch question {
-        case .person(let property):
+        case let .person(property):
             let node = environment.newNode()
                 .and(try ontology.makePersonEdge(env: environment))
                 .and(try compile(property: property, subject: .person))
             return [node]
 
-        case .thing(let property):
+        case let .thing(property):
             let node = environment.newNode()
                 .and(try compile(property: property, subject: .thing))
             return [node]
 
-        case .other(let query):
+        case let .other(query):
             return try compile(query: query) { node, _ in
                 node
             }
@@ -51,7 +51,7 @@ public final class QuestionCompiler<N, E, Env, Ont>
     }
 
     public func compile(query: Query, nodeFactory: NodeFactory) throws -> [Node] {
-        switch query  {
+        switch query {
         case let .withProperty(nestedQuery, property):
             return try compile(query: nestedQuery) { node, name in
                 let edge = try compile(property: property, subject: .named(name))
@@ -297,8 +297,8 @@ public final class QuestionCompiler<N, E, Env, Ont>
                 )
             }
 
-        case .relationship(_, _, _):
-           throw CompilationError.unimplemented
+        case .relationship:
+            throw CompilationError.unimplemented
         }
     }
 }

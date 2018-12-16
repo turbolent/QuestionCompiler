@@ -1,6 +1,6 @@
 
-import QuestionParser
 import QuestionCompiler
+import QuestionParser
 
 public class TestEnvironment: Environment {
     private var count = 0

@@ -9,7 +9,7 @@ public enum TestNodeLabel: NodeLabel {
 }
 
 extension TestNodeLabel: Encodable {
-    public func encode(to encoder: Encoder) throws {
+    public func encode(to _: Encoder) throws {
         fatalError("not implemented")
     }
 }

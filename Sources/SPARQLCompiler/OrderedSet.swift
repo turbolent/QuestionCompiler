@@ -3,11 +3,11 @@ public struct OrderedSet<Element> where Element: Hashable {
     public private(set) var elements: [Element] = []
     private var set: Set<Element> = Set()
 
-    public init<S>(_ sequence: S) where S : Sequence, Element == S.Element {
+    public init<S>(_ sequence: S) where S: Sequence, Element == S.Element {
         sequence.forEach { append($0) }
     }
 
-    public mutating func append<S>(contentsOf newElements: S) where S : Sequence, Element == S.Element {
+    public mutating func append<S>(contentsOf newElements: S) where S: Sequence, Element == S.Element {
         newElements.forEach { append($0) }
     }
 
@@ -17,7 +17,7 @@ public struct OrderedSet<Element> where Element: Hashable {
         elements.append(newElement)
     }
 
-    public func union<S>(_ other: S) -> OrderedSet<Element> where S : Sequence, Element == S.Element {
+    public func union<S>(_ other: S) -> OrderedSet<Element> where S: Sequence, Element == S.Element {
         var result = self
         result.append(contentsOf: other)
         return result
@@ -25,7 +25,6 @@ public struct OrderedSet<Element> where Element: Hashable {
 }
 
 extension OrderedSet: ExpressibleByArrayLiteral {
-
     public init(arrayLiteral elements: Element...) {
         self.init(elements)
     }

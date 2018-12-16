@@ -1,6 +1,6 @@
 
-import SPARQL
 import QuestionCompiler
+import SPARQL
 
 public protocol SPARQLBackend {
     associatedtype N
@@ -30,21 +30,19 @@ public protocol SPARQLBackend {
 }
 
 extension SPARQLBackend {
-
-    public func expand(node: Node, context: NodeContext, env: Env) -> Node {
+    public func expand(node: Node, context _: NodeContext, env _: Env) -> Node {
         return node
     }
 
-    public func prepare(leftExpression: SPARQL.Expression, otherNode: Node) -> SPARQL.Expression {
+    public func prepare(leftExpression: SPARQL.Expression, otherNode _: Node) -> SPARQL.Expression {
         return leftExpression
     }
 
-    public func prepare(op: SPARQL.Op, variables: [String], env: Env) -> SPARQL.Op {
+    public func prepare(op: SPARQL.Op, variables _: [String], env _: Env) -> SPARQL.Op {
         return op
     }
 
-    public func additionalResultVariables(variables: [String], env: Env) -> [String] {
+    public func additionalResultVariables(variables _: [String], env _: Env) -> [String] {
         return []
     }
 }
-
