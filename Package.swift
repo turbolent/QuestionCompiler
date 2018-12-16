@@ -17,9 +17,15 @@ let package = Package(
     targets: [
         .target(
             name: "QuestionCompiler",
-            dependencies: ["QuestionParser", "SPARQL"]),
+            dependencies: ["QuestionParser"]),
         .testTarget(
             name: "QuestionCompilerTests",
-            dependencies: ["QuestionCompiler", "DiffedAssertEqual"]),
+            dependencies: ["QuestionCompiler", "SPARQLCompiler", "DiffedAssertEqual", "TestOntology"]),
+        .testTarget(
+            name: "TestOntology",
+            dependencies: ["QuestionCompiler"]),
+        .target(
+            name: "SPARQLCompiler",
+            dependencies: ["QuestionCompiler", "SPARQL"]),
     ]
 )

@@ -2,14 +2,18 @@
 import QuestionParser
 import QuestionCompiler
 import SPARQL
+import SPARQLCompiler
+import TestOntology
 
-class TestSPARQLBackend: SPARQLBackend {
+public class TestSPARQLBackend: SPARQLBackend {
 
-    typealias N = TestNodeLabel
-    typealias E = TestEdgeLabel
-    typealias Env = TestEnvironment
+    public typealias N = TestNodeLabel
+    public typealias E = TestEdgeLabel
+    public typealias Env = TestEnvironment
 
-    func compile(nodeLabel: TestNodeLabel, env: TestEnvironment) -> SPARQL.Node {
+    public init() {}
+
+    public func compile(nodeLabel: TestNodeLabel, env: TestEnvironment) -> SPARQL.Node {
         switch nodeLabel {
         case let .variable(name):
             return .variable(String(name))
@@ -25,7 +29,7 @@ class TestSPARQLBackend: SPARQLBackend {
         }
     }
 
-    func compile(edgeLabel: TestEdgeLabel, env: TestEnvironment) -> SPARQL.Predicate {
+    public func compile(edgeLabel: TestEdgeLabel, env: TestEnvironment) -> SPARQL.Predicate {
         return .node(.iri(edgeLabel.name))
     }
 }

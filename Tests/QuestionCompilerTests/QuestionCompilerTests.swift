@@ -4,6 +4,7 @@ import DiffedAssertEqual
 import ParserCombinators
 import QuestionParser
 @testable import QuestionCompiler
+import TestOntology
 
 final class QuestionCompilerTests: XCTestCase {
 

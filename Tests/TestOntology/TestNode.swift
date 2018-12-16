@@ -1,5 +1,5 @@
 
 import QuestionCompiler
 
-typealias TestNode =
+public typealias TestNode =
     Node<TestNodeLabel, TestEdgeLabel>

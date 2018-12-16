@@ -2,18 +2,20 @@
 import QuestionParser
 import QuestionCompiler
 
-class TestOntology: Ontology {
-    typealias N = TestNodeLabel
-    typealias E = TestEdgeLabel
-    typealias Env = TestEnvironment
+public class TestOntology: Ontology {
+    public typealias N = TestNodeLabel
+    public typealias E = TestEdgeLabel
+    public typealias Env = TestEnvironment
 
-    func makePersonEdge(
+    public init() {}
+
+    public func makePersonEdge(
         env: TestEnvironment
     ) throws -> TestOntology.Edge {
         return .outgoing(.isA, TestClasses.person)
     }
 
-    func makeNamedPropertyEdge(
+    public func makeNamedPropertyEdge(
         name: [Token],
         node: TestOntology.Node,
         subject: Subject,
@@ -28,7 +30,7 @@ class TestOntology: Ontology {
         }
     }
 
-    func makeInversePropertyEdge(
+    public func makeInversePropertyEdge(
         name: [Token],
         node: TestOntology.Node,
         context: EdgeContext,
@@ -45,7 +47,7 @@ class TestOntology: Ontology {
         }
     }
 
-    func makeAdjectivePropertyEdge(
+    public func makeAdjectivePropertyEdge(
         name: [Token],
         node: TestOntology.Node,
         context: EdgeContext,
@@ -61,7 +63,7 @@ class TestOntology: Ontology {
         }
     }
 
-    func makeComparativePropertyEdge(
+    public func makeComparativePropertyEdge(
         name: [Token],
         node: TestOntology.Node,
         context: EdgeContext,
@@ -83,7 +85,7 @@ class TestOntology: Ontology {
         }
     }
 
-    func makeValuePropertyEdge(
+    public func makeValuePropertyEdge(
         name: [Token],
         node: TestOntology.Node,
         context: EdgeContext,
@@ -112,7 +114,7 @@ class TestOntology: Ontology {
         }
     }
 
-    func makeRelationshipEdge(
+    public func makeRelationshipEdge(
         name: [Token],
         node: TestOntology.Node,
         env: TestEnvironment
@@ -160,7 +162,7 @@ class TestOntology: Ontology {
         }
     }
 
-    func makeValueNode(
+    public func makeValueNode(
         name: [Token],
         filter: [Token],
         env: TestEnvironment
@@ -179,7 +181,7 @@ class TestOntology: Ontology {
             .outgoing(.hasName, Node(label: nameLabel))
     }
 
-    func makeNumberNode(
+    public func makeNumberNode(
         number: [Token],
         unit: [Token],
         filter: [Token],

@@ -1,7 +1,8 @@
 
+import QuestionCompiler
 import SPARQL
 
-public final class SPARQLGraphCompiler<N, E, Env, Backend>
+public final class SPARQLCompiler<N, E, Env, Backend>
     where Backend: SPARQLBackend,
         Backend.Env == Env,
         Backend.N == N,
@@ -62,7 +63,7 @@ public final class SPARQLGraphCompiler<N, E, Env, Backend>
         }
     }
 
-    private func compile(order: Order) -> SPARQL.Order {
+    private func compile(order: GraphOrder) -> SPARQL.Order {
         switch order {
         case .ascending:
             return .ascending

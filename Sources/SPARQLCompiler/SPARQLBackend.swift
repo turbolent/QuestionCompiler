@@ -1,5 +1,6 @@
 
 import SPARQL
+import QuestionCompiler
 
 public protocol SPARQLBackend {
     associatedtype N
