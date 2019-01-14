@@ -17,7 +17,7 @@ public class TestSPARQLBackend: SPARQLBackend {
         case let .variable(name):
             return .variable(String(name))
 
-        case let .id(name):
+        case let .item(name):
             return .iri(name)
 
         case let .string(value):

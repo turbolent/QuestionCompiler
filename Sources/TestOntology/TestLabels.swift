@@ -3,27 +3,69 @@ import QuestionCompiler
 
 public enum TestNodeLabel: NodeLabel {
     case variable(Int)
-    case id(String)
+    case item(String)
     case string(String)
     case number(Double, unit: String?)
 }
 
 extension TestNodeLabel: Encodable {
-    public func encode(to _: Encoder) throws {
-        fatalError("not implemented")
+
+    private enum CodingKeys: CodingKey {
+        case type
+        case subtype
+        case name
+        case id
+        case value
+        case url
+    }
+
+    private enum PrimaryType: String, Encodable {
+        case item
+        case variable
+        case value
+    }
+
+    private enum Subtype: String, Encodable {
+        case string
+        case number
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        switch self {
+        case let .item(name):
+            try container.encode(PrimaryType.item, forKey: .type)
+            try container.encode(name, forKey: .name)
+            try container.encode("http://example.org/item/\(name)", forKey: .url)
+
+        case let .variable(id):
+            try container.encode(PrimaryType.variable, forKey: .type)
+            try container.encode(id, forKey: .id)
+
+        case let .string(value):
+            try container.encode(PrimaryType.value, forKey: .type)
+            try container.encode(Subtype.string, forKey: .subtype)
+            try container.encode(value, forKey: .value)
+
+        case let .number(value, _):
+            try container.encode(PrimaryType.value, forKey: .type)
+            try container.encode(Subtype.number, forKey: .subtype)
+            try container.encode(value, forKey: .value)
+        }
     }
 }
 
 public struct TestClasses {
-    public static let person = TestNode(label: .id("person"))
-    public static let movie = TestNode(label: .id("movie"))
-    public static let mountain = TestNode(label: .id("mountain"))
-    public static let author = TestNode(label: .id("author"))
-    public static let city = TestNode(label: .id("city"))
-    public static let president = TestNode(label: .id("president"))
-    public static let album = TestNode(label: .id("album"))
-    public static let woman = TestNode(label: .id("woman"))
-    public static let planet = TestNode(label: .id("planet"))
+    public static let person = TestNode(label: .item("person"))
+    public static let movie = TestNode(label: .item("movie"))
+    public static let mountain = TestNode(label: .item("mountain"))
+    public static let author = TestNode(label: .item("author"))
+    public static let city = TestNode(label: .item("city"))
+    public static let president = TestNode(label: .item("president"))
+    public static let album = TestNode(label: .item("album"))
+    public static let woman = TestNode(label: .item("woman"))
+    public static let planet = TestNode(label: .item("planet"))
 
     private init() {}
 }
@@ -47,4 +89,20 @@ public struct TestEdgeLabel: EdgeLabel {
     public static let hasPerformer = TestEdgeLabel(name: "hasPerformer")
     public static let hasPopulation = TestEdgeLabel(name: "hasPopulation")
     public static let discovered = TestEdgeLabel(name: "discovered")
+}
+
+extension TestEdgeLabel: Encodable {
+
+    private enum CodingKeys: CodingKey {
+        case type
+        case name
+        case url
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode("property", forKey: .type)
+        try container.encode(name, forKey: .name)
+        try container.encode("http://example.org/property/\(name)", forKey: .url)
+    }
 }
