@@ -43,8 +43,8 @@ extension Filter: Encodable {
     private enum Subtype: String, Encodable {
         case conjunction
         case equals
-        case lessThan
-        case greaterThan
+        case lessThan = "less-than"
+        case greaterThan = "greater-than"
     }
 
     public func encode(to encoder: Encoder) throws {
