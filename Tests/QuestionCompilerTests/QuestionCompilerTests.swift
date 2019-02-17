@@ -225,11 +225,11 @@ final class QuestionCompilerTests: XCTestCase {
 
         let japaneseCities = env.newNode()
             .isA(TestClasses.city)
-            .and(.outgoing(.isLocatedIn, japan))
+            .outgoing(.isLocatedIn, japan)
 
         let chineseCities = env.newNode()
             .isA(TestClasses.city)
-            .and(.outgoing(.isLocatedIn, china))
+            .outgoing(.isLocatedIn, china)
 
         diffedAssertEqual([japaneseCities, chineseCities], result)
     }
@@ -380,9 +380,9 @@ final class QuestionCompilerTests: XCTestCase {
             .hasName("Paris")
 
         let expected = person
-            .and(
+            & (
                 Edge.outgoing(.hasPlaceOfBirth, place)
-                .or(Edge.outgoing(.hasPlaceOfDeath, place2))
+                | Edge.outgoing(.hasPlaceOfDeath, place2)
             )
 
         diffedAssertEqual([expected], result)
@@ -416,9 +416,9 @@ final class QuestionCompilerTests: XCTestCase {
             .hasName("Berkeley")
 
         let expected = person
-            .and(
+            & (
                 Edge.outgoing(.attends, place)
-                .or(Edge.outgoing(.attends, place2))
+                | Edge.outgoing(.attends, place2)
             )
 
         diffedAssertEqual([expected], result)
@@ -452,8 +452,8 @@ final class QuestionCompilerTests: XCTestCase {
             .hasName("Berkeley")
 
         let expected = person
-            .and(Edge.outgoing(.attends, place))
-            .and(Edge.outgoing(.attends, place2))
+            .outgoing(.attends, place)
+            .outgoing(.attends, place2)
 
         diffedAssertEqual([expected], result)
     }
@@ -488,9 +488,9 @@ final class QuestionCompilerTests: XCTestCase {
             .hasName("Berkeley")
 
         let expected = person
-            .and(
+            & (
                 Edge.outgoing(.attends, place)
-                .or(Edge.outgoing(.attends, place2))
+                | Edge.outgoing(.attends, place2)
             )
 
         diffedAssertEqual([expected], result)
@@ -526,8 +526,8 @@ final class QuestionCompilerTests: XCTestCase {
             .hasName("Berkeley")
 
         let expected = person
-            .and(Edge.outgoing(.attends, place))
-            .and(Edge.outgoing(.attends, place2))
+            .outgoing(.attends, place)
+            .outgoing(.attends, place2)
 
         diffedAssertEqual([expected], result)
     }

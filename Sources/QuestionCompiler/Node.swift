@@ -69,6 +69,14 @@ public struct Node<N, E>: Hashable
         )
         return and(aggregate)
     }
+
+    public static func &(lhs: Node, rhs: Edge) -> Node {
+        return lhs.and(rhs)
+    }
+
+    public static func |(lhs: Node, rhs: Edge) -> Node {
+        return lhs.or(rhs)
+    }
 }
 
 extension Node: Encodable {

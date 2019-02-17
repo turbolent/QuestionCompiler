@@ -126,17 +126,14 @@ public class TestOntology: Ontology {
         case ["grandchild"]:
             return .incoming(node, .hasGrandChild)
         case ["city"]:
-            return TestOntology.Edge
-                .outgoing(TestEdgeLabel.isA, TestClasses.city)
-                .and(.outgoing(TestEdgeLabel.isLocatedIn, node))
+            return .outgoing(TestEdgeLabel.isA, TestClasses.city)
+                & .outgoing(TestEdgeLabel.isLocatedIn, node)
         case ["album"]:
-            return TestOntology.Edge
-                .outgoing(.isA, TestClasses.album)
-                .and(.outgoing(TestEdgeLabel.hasPerformer, node))
+            return .outgoing(.isA, TestClasses.album)
+                & .outgoing(TestEdgeLabel.hasPerformer, node)
         case ["daughter"]:
-            return TestOntology.Edge
-                .outgoing(.isA, TestClasses.woman)
-                .and(.incoming(node, .hasChild))
+            return .outgoing(.isA, TestClasses.woman)
+                & .incoming(node, .hasChild)
         default:
             fatalError("not implemented")
         }

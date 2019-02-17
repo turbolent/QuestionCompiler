@@ -185,11 +185,11 @@ final class SPARQLCompilerTests: XCTestCase {
 
         let japaneseCities = env.newNode()
             .isA(TestClasses.city)
-            .and(.outgoing(.isLocatedIn, japan))
+            .outgoing(.isLocatedIn, japan)
 
         let chineseCities = env.newNode()
             .isA(TestClasses.city)
-            .and(.outgoing(.isLocatedIn, china))
+            .outgoing(.isLocatedIn, china)
 
         // TODO: merge multiple queries
 
@@ -315,9 +315,9 @@ final class SPARQLCompilerTests: XCTestCase {
             .hasName("Paris")
 
         let graph = person
-            .and(
+            & (
                 Edge.outgoing(.hasPlaceOfBirth, place)
-                .or(Edge.outgoing(.hasPlaceOfDeath, place2))
+                | Edge.outgoing(.hasPlaceOfDeath, place2)
             )
 
         let expected = """
@@ -352,9 +352,9 @@ final class SPARQLCompilerTests: XCTestCase {
             .hasName("Berkeley")
 
         let graph = person
-            .and(
+            & (
                 Edge.outgoing(.attends, place)
-                .or(Edge.outgoing(.attends, place2))
+                | Edge.outgoing(.attends, place2)
             )
 
         let expected = """
@@ -389,8 +389,8 @@ final class SPARQLCompilerTests: XCTestCase {
             .hasName("Berkeley")
 
         let graph = person
-            .and(Edge.outgoing(.attends, place))
-            .and(Edge.outgoing(.attends, place2))
+            .outgoing(.attends, place)
+            .outgoing(.attends, place2)
 
         let expected = """
             SELECT DISTINCT ?0 {

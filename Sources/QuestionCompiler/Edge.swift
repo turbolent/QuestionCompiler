@@ -55,7 +55,16 @@ public indirect enum Edge<E, N>: Hashable
             return .disjunction([self, edge])
         }
     }
+
+    public static func &(lhs: Edge, rhs: Edge) -> Edge {
+        return lhs.and(rhs)
+    }
+
+    public static func |(lhs: Edge, rhs: Edge) -> Edge {
+        return lhs.or(rhs)
+    }
 }
+
 
 extension Edge: Encodable {
 
