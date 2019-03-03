@@ -16,7 +16,7 @@ class EncodingTests: XCTestCase {
 
 
         if #available(OSX 10.13, *) {
-            diffJSON(
+            diffedAssertJSONEqual(
                 """
                 {
                   "label" : {
