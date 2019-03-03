@@ -7,28 +7,44 @@ let package = Package(
     products: [
         .library(
             name: "QuestionCompiler",
-            targets: ["QuestionCompiler"]),
+            targets: ["QuestionCompiler"]
+        ),
     ],
     dependencies: [
         .package(url: "https://github.com/turbolent/QuestionParser.git", .branch("master")),
-        .package(url: "https://github.com/turbolent/DiffedAssertEqual.git", .branch("master")),
-        .package(url: "https://github.com/turbolent/SPARQL.git", .branch("master"))
+        .package(url: "https://github.com/turbolent/DiffedAssertEqual.git", from: "0.1.0"),
+        .package(url: "https://github.com/turbolent/SPARQL.git", from: "0.1.0")
     ],
     targets: [
         .target(
             name: "QuestionCompiler",
-            dependencies: ["QuestionParser"]),
+            dependencies: ["QuestionParser"]
+        ),
         .testTarget(
             name: "QuestionCompilerTests",
-            dependencies: ["QuestionCompiler", "SPARQLCompiler", "DiffedAssertEqual", "TestOntology"]),
+            dependencies: [
+                "QuestionCompiler",
+                "SPARQLCompiler",
+                "DiffedAssertEqual",
+                "TestOntology"
+            ]
+        ),
         .target(
             name: "TestOntology",
-            dependencies: ["QuestionCompiler"]),
+            dependencies: ["QuestionCompiler"]
+        ),
         .target(
             name: "SPARQLCompiler",
-            dependencies: ["QuestionCompiler", "SPARQL"]),
+            dependencies: ["QuestionCompiler", "SPARQL"]
+        ),
         .testTarget(
             name: "SPARQLCompilerTests",
-            dependencies: ["QuestionCompiler", "SPARQLCompiler", "DiffedAssertEqual", "TestOntology"]),
+            dependencies: [
+                "QuestionCompiler",
+                "SPARQLCompiler",
+                "DiffedAssertEqual",
+                "TestOntology"
+            ]
+        ),
     ]
 )
