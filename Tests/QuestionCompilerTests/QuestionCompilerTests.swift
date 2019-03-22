@@ -9,8 +9,8 @@ final class QuestionCompilerTests: XCTestCase {
 
     private func newCompiler() -> TestCompiler {
         let environment = TestEnvironment()
-        let ontology = TestOntology()
-        return QuestionCompiler(environment: environment, ontology: ontology)
+        let provider = TestProvider()
+        return QuestionCompiler(environment: environment, provider: provider)
     }
 
     func testQ1() throws {
@@ -116,7 +116,7 @@ final class QuestionCompilerTests: XCTestCase {
 
         let env = TestEnvironment()
 
-        let elevation: Node = .number(1000.0, unit: "meter")
+        let elevation: Node<TestLabels> = .number(1000.0, unit: "meter")
 
         let expected = env.newNode()
             .isA(TestClasses.mountain)

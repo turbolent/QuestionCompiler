@@ -2,25 +2,24 @@
 import QuestionCompiler
 import QuestionParser
 
-public class TestOntology: Ontology {
-    public typealias N = TestNodeLabel
-    public typealias E = TestEdgeLabel
+public class TestProvider: GraphProvider {
+    public typealias T = TestLabels
     public typealias Env = TestEnvironment
 
     public init() {}
 
     public func makePersonEdge(
         env _: TestEnvironment
-    ) throws -> TestOntology.Edge {
+    ) throws -> TestProvider.Edge {
         return .outgoing(.isA, TestClasses.person)
     }
 
     public func makeNamedPropertyEdge(
         name: [Token],
-        node: TestOntology.Node,
+        node: TestProvider.Node,
         subject _: Subject,
         env _: TestEnvironment
-    ) throws -> TestOntology.Edge {
+    ) throws -> TestProvider.Edge {
         let lemmas = name.map { $0.lemma }
         switch lemmas {
         case ["write"]:
@@ -32,10 +31,10 @@ public class TestOntology: Ontology {
 
     public func makeInversePropertyEdge(
         name: [Token],
-        node: TestOntology.Node,
+        node: TestProvider.Node,
         context _: EdgeContext,
         env _: TestEnvironment
-    ) throws -> TestOntology.Edge {
+    ) throws -> TestProvider.Edge {
         let lemmas = name.map { $0.lemma }
         switch lemmas {
         case ["do", "marry"]:
@@ -49,10 +48,10 @@ public class TestOntology: Ontology {
 
     public func makeAdjectivePropertyEdge(
         name: [Token],
-        node: TestOntology.Node,
+        node: TestProvider.Node,
         context: EdgeContext,
         env _: TestEnvironment
-    ) throws -> TestOntology.Edge {
+    ) throws -> TestProvider.Edge {
         let lemmas = (name + context.filter)
             .map { $0.lemma }
         switch lemmas {
@@ -65,10 +64,10 @@ public class TestOntology: Ontology {
 
     public func makeComparativePropertyEdge(
         name: [Token],
-        node: TestOntology.Node,
+        node: TestProvider.Node,
         context: EdgeContext,
         env: TestEnvironment
-    ) throws -> TestOntology.Edge {
+    ) throws -> TestProvider.Edge {
         let lemmas = (name + context.filter)
             .map { $0.lemma }
         switch lemmas {
@@ -87,10 +86,10 @@ public class TestOntology: Ontology {
 
     public func makeValuePropertyEdge(
         name: [Token],
-        node: TestOntology.Node,
+        node: TestProvider.Node,
         context: EdgeContext,
         env: TestEnvironment
-    ) throws -> TestOntology.Edge {
+    ) throws -> TestProvider.Edge {
         let lemmas = (name + context.filter)
             .map { $0.lemma }
         switch lemmas {
@@ -116,9 +115,9 @@ public class TestOntology: Ontology {
 
     public func makeRelationshipEdge(
         name: [Token],
-        node: TestOntology.Node,
+        node: TestProvider.Node,
         env _: TestEnvironment
-    ) throws -> TestOntology.Edge {
+    ) throws -> TestProvider.Edge {
         let lemmas = name.filter { $0.tag != "DT" }.map { $0.lemma }
         switch lemmas {
         case ["child"]:
@@ -162,7 +161,7 @@ public class TestOntology: Ontology {
         name: [Token],
         filter _: [Token],
         env: TestEnvironment
-    ) throws -> TestOntology.Node {
+    ) throws -> TestProvider.Node {
         if let `class` = getClass(name) {
             return env.newNode()
                 .outgoing(.isA, `class`)
@@ -181,7 +180,7 @@ public class TestOntology: Ontology {
         unit: [Token],
         filter _: [Token],
         env _: TestEnvironment
-    ) throws -> TestOntology.Node {
+    ) throws -> TestProvider.Node {
         let numberString = number.map { $0.lemma }.joined(separator: " ")
         let unitString = unit.isEmpty
             ? nil

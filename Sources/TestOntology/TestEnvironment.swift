@@ -7,7 +7,7 @@ public class TestEnvironment: Environment {
 
     public init() {}
 
-    public func newNode() -> Node<TestNodeLabel, TestEdgeLabel> {
+    public func newNode() -> Node<TestLabels> {
         defer { count += 1 }
         return Node(label: .variable(count))
     }

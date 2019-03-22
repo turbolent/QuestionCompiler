@@ -2,15 +2,10 @@
 import QuestionCompiler
 import SPARQL
 
-public final class SPARQLCompiler<N, E, Env, Backend>
-    where Backend: SPARQLBackend,
-        Backend.Env == Env,
-        Backend.N == N,
-        Backend.E == E
-{
-    public typealias Node = GraphNode<N, E>
-    public typealias Edge = GraphEdge<E, N>
-    public typealias Filter = GraphFilter<N, E>
+public final class SPARQLCompiler<Backend> where Backend: SPARQLBackend {
+    public typealias Node = GraphNode<Backend.Env.T>
+    public typealias Edge = GraphEdge<Backend.Env.T>
+    public typealias Filter = GraphFilter<Backend.Env.T>
 
     public enum Error: Swift.Error {
         case missingEdge
@@ -19,11 +14,11 @@ public final class SPARQLCompiler<N, E, Env, Backend>
         case groupingNodeNotCompiledToVariable
     }
 
-    private let environment: Env
+    private let environment: Backend.Env
     private let backend: Backend
     private var nodeResults: [Node: NodeResult] = [:]
 
-    public init(environment: Env, backend: Backend) {
+    public init(environment: Backend.Env, backend: Backend) {
         self.environment = environment
         self.backend = backend
     }
@@ -284,7 +279,7 @@ public final class SPARQLCompiler<N, E, Env, Backend>
     }
 
     private func compile(
-        edgeLabel: E,
+        edgeLabel: Backend.Env.T.Edge,
         compiledNode: SPARQL.Node,
         otherNode: Node,
         direction: EdgeDirection

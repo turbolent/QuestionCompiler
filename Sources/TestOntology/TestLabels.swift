@@ -1,6 +1,14 @@
 
 import QuestionCompiler
 
+public struct TestLabels: Labels {
+    public typealias Node = TestNodeLabel
+    public typealias Edge = TestEdgeLabel
+
+    private init() {}
+}
+
+
 public enum TestNodeLabel: NodeLabel {
     case variable(Int)
     case item(String)
@@ -69,6 +77,7 @@ public struct TestClasses {
 
     private init() {}
 }
+
 
 public struct TestEdgeLabel: EdgeLabel {
     public let name: String

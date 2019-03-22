@@ -1,15 +1,13 @@
 
 import QuestionParser
 
-public protocol Ontology {
-    associatedtype N
-    associatedtype E
-    associatedtype Env: Environment
-        where Env.N == N, Env.E == E
+public protocol GraphProvider {
+    associatedtype T
+    associatedtype Env: Environment where Env.T == T
 
-    typealias Node = GraphNode<N, E>
-    typealias Edge = GraphEdge<E, N>
-    typealias Filter = GraphFilter<N, E>
+    typealias Node = GraphNode<T>
+    typealias Edge = GraphEdge<T>
+    typealias Filter = GraphFilter<T>
 
     /// Return an edge which will identify a node representing the subject to be a person.
     ///

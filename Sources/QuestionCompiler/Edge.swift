@@ -1,12 +1,10 @@
 
-public indirect enum Edge<E, N>: Hashable
-    where E: EdgeLabel, N: NodeLabel
-{
-    public typealias Node = GraphNode<N, E>
-    public typealias Edge = GraphEdge<E, N>
+public indirect enum Edge<T>: Hashable where T: Labels {
+    public typealias Node = GraphNode<T>
+    public typealias Edge = GraphEdge<T>
 
-    case incoming(_ source: Node, _ label: E)
-    case outgoing(_ label: E, _ target: Node)
+    case incoming(_ source: Node, _ label: T.Edge)
+    case outgoing(_ label: T.Edge, _ target: Node)
     case conjunction([Edge])
     case disjunction([Edge])
     case aggregate(

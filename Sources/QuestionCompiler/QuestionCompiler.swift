@@ -5,36 +5,31 @@ public typealias GraphNode = Node
 public typealias GraphEdge = Edge
 public typealias GraphFilter = Filter
 
-public final class QuestionCompiler<N, E, Env, Ont>
-    where Ont: Ontology,
-        Ont.Env == Env,
-        Ont.N == N,
-        Ont.E == E
-{
+public final class QuestionCompiler<P> where P: GraphProvider {
     public enum CompilationError: Error {
         case unimplemented
     }
 
-    public typealias Node = GraphNode<N, E>
-    public typealias Edge = GraphEdge<E, N>
+    public typealias Node = GraphNode<P.Env.T>
+    public typealias Edge = GraphEdge<P.Env.T>
 
     public typealias NodeFactory = (Node, [Token]) throws -> Node
     public typealias EdgeContextFactory = (Subject) throws -> EdgeContext
     public typealias EdgeFactory = (Node, EdgeContextFactory) throws -> Edge
 
-    public let environment: Env
-    public let ontology: Ont
+    public let environment: P.Env
+    public let provider: P
 
-    public init(environment: Env, ontology: Ont) {
+    public init(environment: P.Env, provider: P) {
         self.environment = environment
-        self.ontology = ontology
+        self.provider = provider
     }
 
     public func compile(question: ListQuestion) throws -> [Node] {
         switch question {
         case let .person(property):
             let node = environment.newNode()
-                .and(try ontology.makePersonEdge(env: environment))
+                .and(try provider.makePersonEdge(env: environment))
                 .and(try compile(property: property, subject: .person))
             return [node]
 
@@ -59,7 +54,7 @@ public final class QuestionCompiler<N, E, Env, Ont>
             }
 
         case let .named(name):
-            let node = try ontology.makeValueNode(
+            let node = try provider.makeValueNode(
                 name: name,
                 filter: [],
                 env: environment
@@ -82,7 +77,7 @@ public final class QuestionCompiler<N, E, Env, Ont>
         switch query {
         case let .named(name):
             return try nodes.map { node in
-                let edge = try ontology.makeRelationshipEdge(
+                let edge = try provider.makeRelationshipEdge(
                     name: name,
                     node: node,
                     env: environment
@@ -111,7 +106,7 @@ public final class QuestionCompiler<N, E, Env, Ont>
     public func compile(property: Property, subject: Subject) throws -> Edge {
         switch property {
         case let .named(name):
-            return try ontology.makeNamedPropertyEdge(
+            return try provider.makeNamedPropertyEdge(
                 name: name,
                 node: environment.newNode(),
                 subject: subject,
@@ -122,7 +117,7 @@ public final class QuestionCompiler<N, E, Env, Ont>
             return try compile(filter: filter) { node, contextFactory in
                 let context = try contextFactory(subject)
                 if case .withComparativeModifier = filter {
-                    return try ontology.makeComparativePropertyEdge(
+                    return try provider.makeComparativePropertyEdge(
                         name: name,
                         node: node,
                         context: context,
@@ -130,7 +125,7 @@ public final class QuestionCompiler<N, E, Env, Ont>
                     )
                 }
 
-                return try ontology.makeValuePropertyEdge(
+                return try provider.makeValuePropertyEdge(
                     name: name,
                     node: node,
                     context: context,
@@ -140,7 +135,7 @@ public final class QuestionCompiler<N, E, Env, Ont>
 
         case let .inverseWithFilter(name, filter):
             return try compile(filter: filter) { node, contextFactory in
-                try ontology.makeInversePropertyEdge(
+                try provider.makeInversePropertyEdge(
                     name: name,
                     node: node,
                     context: contextFactory(subject),
@@ -150,7 +145,7 @@ public final class QuestionCompiler<N, E, Env, Ont>
 
         case let .adjectiveWithFilter(name, filter):
             return try compile(filter: filter) { node, contextFactory in
-                try ontology.makeAdjectivePropertyEdge(
+                try provider.makeAdjectivePropertyEdge(
                     name: name,
                     node: node,
                     context: contextFactory(subject),
@@ -212,7 +207,7 @@ public final class QuestionCompiler<N, E, Env, Ont>
     public func compile(value: Value, filter: [Token], edgeFactory: EdgeFactory) throws -> Edge {
         switch value {
         case let .named(name):
-            let node = try ontology.makeValueNode(
+            let node = try provider.makeValueNode(
                 name: name,
                 filter: filter,
                 env: environment
@@ -228,7 +223,7 @@ public final class QuestionCompiler<N, E, Env, Ont>
             }
 
         case let .number(number):
-            let node = try ontology.makeNumberNode(
+            let node = try provider.makeNumberNode(
                 number: number,
                 unit: [],
                 filter: filter,
@@ -245,7 +240,7 @@ public final class QuestionCompiler<N, E, Env, Ont>
             }
 
         case let .numberWithUnit(number, unit):
-            let node = try ontology.makeNumberNode(
+            let node = try provider.makeNumberNode(
                 number: number,
                 unit: unit,
                 filter: filter,
@@ -275,7 +270,7 @@ public final class QuestionCompiler<N, E, Env, Ont>
 
         case let .relationship(.named(name), second, _):
             let secondEdgeFactory: EdgeFactory = { node, _ in
-                try self.ontology.makeRelationshipEdge(
+                try self.provider.makeRelationshipEdge(
                     name: name,
                     node: node,
                     env: self.environment

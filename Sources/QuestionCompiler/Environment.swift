@@ -1,7 +1,6 @@
 
 public protocol Environment {
-    associatedtype N: NodeLabel
-    associatedtype E: EdgeLabel
+    associatedtype T: Labels
 
-    func newNode() -> Node<N, E>
+    func newNode() -> Node<T>
 }
