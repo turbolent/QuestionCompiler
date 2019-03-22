@@ -1,16 +1,16 @@
 
-public struct Node<T>: Hashable where T: Labels {
-    public typealias Node = GraphNode<T>
-    public typealias Edge = GraphEdge<T>
-    public typealias Filter = GraphFilter<T>
+public struct Node<Labels>: Hashable where Labels: GraphLabels {
+    public typealias Node = GraphNode<Labels>
+    public typealias Edge = GraphEdge<Labels>
+    public typealias Filter = GraphFilter<Labels>
 
-    public var label: T.Node
+    public var label: Labels.Node
     public var edge: Edge?
     public var filter: Filter?
     public var order: Order?
 
     public init(
-        label: T.Node,
+        label: Labels.Node,
         edge: Edge? = nil,
         filter: Filter? = nil,
         order: Order? = nil
@@ -27,11 +27,11 @@ public struct Node<T>: Hashable where T: Labels {
         return result
     }
 
-    public func outgoing(_ label: T.Edge, _ target: Node) -> Node {
+    public func outgoing(_ label: Labels.Edge, _ target: Node) -> Node {
         return and(.outgoing(label, target))
     }
 
-    public func incoming(_ source: Node, _ label: T.Edge) -> Node {
+    public func incoming(_ source: Node, _ label: Labels.Edge) -> Node {
         return and(.incoming(source, label))
     }
 

@@ -5,14 +5,14 @@ import SPARQL
 public protocol SPARQLBackend {
     associatedtype Env: Environment
 
-    typealias Node = GraphNode<Env.T>
-    typealias Edge = GraphEdge<Env.T>
+    typealias Node = GraphNode<Env.Labels>
+    typealias Edge = GraphEdge<Env.Labels>
 
     /// Return a SPARQL node for the given node label
-    func compile(nodeLabel: Env.T.Node, env: Env) -> SPARQL.Node
+    func compile(nodeLabel: Env.Labels.Node, env: Env) -> SPARQL.Node
 
     /// Return a SPARQL node or path for the given edge label
-    func compile(edgeLabel: Env.T.Edge, env: Env) -> SPARQL.Predicate
+    func compile(edgeLabel: Env.Labels.Edge, env: Env) -> SPARQL.Predicate
 
     //// optional hooks
 

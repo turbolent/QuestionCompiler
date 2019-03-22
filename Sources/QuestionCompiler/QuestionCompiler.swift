@@ -10,8 +10,8 @@ public final class QuestionCompiler<P> where P: GraphProvider {
         case unimplemented
     }
 
-    public typealias Node = GraphNode<P.Env.T>
-    public typealias Edge = GraphEdge<P.Env.T>
+    public typealias Node = GraphNode<P.Env.Labels>
+    public typealias Edge = GraphEdge<P.Env.Labels>
 
     public typealias NodeFactory = (Node, [Token]) throws -> Node
     public typealias EdgeContextFactory = (Subject) throws -> EdgeContext

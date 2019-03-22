@@ -1,7 +1,7 @@
 
 import QuestionParser
 
-public indirect enum Filter<T>: Hashable where T: Labels {
+public indirect enum Filter<T>: Hashable where T: GraphLabels {
     public typealias Node = GraphNode<T>
     public typealias Filter = GraphFilter<T>
 

@@ -1,6 +1,6 @@
 
 public protocol Environment {
-    associatedtype T: Labels
+    associatedtype Labels: GraphLabels
 
-    func newNode() -> Node<T>
+    func newNode() -> Node<Labels>
 }

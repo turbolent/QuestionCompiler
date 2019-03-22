@@ -1,7 +1,7 @@
 
 import QuestionCompiler
 
-public struct TestLabels: Labels {
+public struct TestLabels: GraphLabels {
     public typealias Node = TestNodeLabel
     public typealias Edge = TestEdgeLabel
 

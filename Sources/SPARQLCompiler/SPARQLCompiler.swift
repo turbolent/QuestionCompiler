@@ -3,9 +3,9 @@ import QuestionCompiler
 import SPARQL
 
 public final class SPARQLCompiler<Backend> where Backend: SPARQLBackend {
-    public typealias Node = GraphNode<Backend.Env.T>
-    public typealias Edge = GraphEdge<Backend.Env.T>
-    public typealias Filter = GraphFilter<Backend.Env.T>
+    public typealias Node = GraphNode<Backend.Env.Labels>
+    public typealias Edge = GraphEdge<Backend.Env.Labels>
+    public typealias Filter = GraphFilter<Backend.Env.Labels>
 
     public enum Error: Swift.Error {
         case missingEdge
@@ -279,7 +279,7 @@ public final class SPARQLCompiler<Backend> where Backend: SPARQLBackend {
     }
 
     private func compile(
-        edgeLabel: Backend.Env.T.Edge,
+        edgeLabel: Backend.Env.Labels.Edge,
         compiledNode: SPARQL.Node,
         otherNode: Node,
         direction: EdgeDirection

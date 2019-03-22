@@ -3,7 +3,7 @@ import QuestionParser
 
 public protocol GraphProvider {
     associatedtype T
-    associatedtype Env: Environment where Env.T == T
+    associatedtype Env: Environment where Env.Labels == T
 
     typealias Node = GraphNode<T>
     typealias Edge = GraphEdge<T>

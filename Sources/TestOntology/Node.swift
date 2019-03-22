@@ -1,8 +1,10 @@
 
 import QuestionCompiler
 
-public extension Node where T.Node == TestNodeLabel, T.Edge == TestEdgeLabel {
-
+public extension Node
+    where Labels.Node == TestNodeLabel,
+        Labels.Edge == TestEdgeLabel
+{
     func isA(_ class: Node) -> Node {
         return outgoing(.isA, `class`)
     }
