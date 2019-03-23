@@ -3,7 +3,7 @@ import QuestionCompiler
 import QuestionParser
 
 public class TestProvider: GraphProvider {
-    public typealias T = TestLabels
+    public typealias Labels = TestLabels
     public typealias Env = TestEnvironment
 
     public init() {}

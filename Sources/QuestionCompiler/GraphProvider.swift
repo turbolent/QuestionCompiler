@@ -2,12 +2,12 @@
 import QuestionParser
 
 public protocol GraphProvider {
-    associatedtype T
-    associatedtype Env: Environment where Env.Labels == T
+    associatedtype Labels
+    associatedtype Env: Environment where Env.Labels == Labels
 
-    typealias Node = GraphNode<T>
-    typealias Edge = GraphEdge<T>
-    typealias Filter = GraphFilter<T>
+    typealias Node = GraphNode<Labels>
+    typealias Edge = GraphEdge<Labels>
+    typealias Filter = GraphFilter<Labels>
 
     /// Return an edge which will identify a node representing the subject to be a person.
     ///

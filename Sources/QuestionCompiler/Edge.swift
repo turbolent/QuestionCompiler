@@ -1,5 +1,7 @@
 
-public indirect enum Edge<Labels>: Hashable where Labels: GraphLabels {
+public indirect enum Edge<Labels>: Hashable
+    where Labels: GraphLabels
+{
     public typealias Node = GraphNode<Labels>
     public typealias Edge = GraphEdge<Labels>
 

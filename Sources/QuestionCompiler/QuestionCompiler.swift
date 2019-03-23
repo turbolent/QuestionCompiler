@@ -5,22 +5,25 @@ public typealias GraphNode = Node
 public typealias GraphEdge = Edge
 public typealias GraphFilter = Filter
 
-public final class QuestionCompiler<P> where P: GraphProvider {
+public final class QuestionCompiler<Provider>
+    where Provider: GraphProvider
+{
     public enum CompilationError: Error {
         case unimplemented
     }
 
-    public typealias Node = GraphNode<P.Env.Labels>
-    public typealias Edge = GraphEdge<P.Env.Labels>
+    public typealias Labels = Provider.Env.Labels
+    public typealias Node = GraphNode<Labels>
+    public typealias Edge = GraphEdge<Labels>
 
     public typealias NodeFactory = (Node, [Token]) throws -> Node
     public typealias EdgeContextFactory = (Subject) throws -> EdgeContext
     public typealias EdgeFactory = (Node, EdgeContextFactory) throws -> Edge
 
-    public let environment: P.Env
-    public let provider: P
+    public let environment: Provider.Env
+    public let provider: Provider
 
-    public init(environment: P.Env, provider: P) {
+    public init(environment: Provider.Env, provider: Provider) {
         self.environment = environment
         self.provider = provider
     }

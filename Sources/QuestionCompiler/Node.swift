@@ -1,5 +1,7 @@
 
-public struct Node<Labels>: Hashable where Labels: GraphLabels {
+public struct Node<Labels>: Hashable
+    where Labels: GraphLabels
+{
     public typealias Node = GraphNode<Labels>
     public typealias Edge = GraphEdge<Labels>
     public typealias Filter = GraphFilter<Labels>

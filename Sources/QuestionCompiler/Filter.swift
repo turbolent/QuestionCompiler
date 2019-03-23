@@ -1,9 +1,11 @@
 
 import QuestionParser
 
-public indirect enum Filter<T>: Hashable where T: GraphLabels {
-    public typealias Node = GraphNode<T>
-    public typealias Filter = GraphFilter<T>
+public indirect enum Filter<Labels>: Hashable
+    where Labels: GraphLabels
+{
+    public typealias Node = GraphNode<Labels>
+    public typealias Filter = GraphFilter<Labels>
 
     case conjunction([Filter])
     case equals(Node)
