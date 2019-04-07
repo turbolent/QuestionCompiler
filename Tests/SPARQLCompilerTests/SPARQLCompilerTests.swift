@@ -4,7 +4,7 @@ import QuestionCompiler
 import QuestionParser
 import SPARQL
 import SPARQLCompiler
-import TestOntology
+import TestGraphProvider
 import XCTest
 
 final class SPARQLCompilerTests: XCTestCase {

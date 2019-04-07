@@ -2,7 +2,7 @@ import QuestionCompiler
 import QuestionParser
 import SPARQL
 import SPARQLCompiler
-import TestOntology
+import TestGraphProvider
 
 public class TestSPARQLBackend: SPARQLBackend {
 

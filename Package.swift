@@ -26,11 +26,11 @@ let package = Package(
                 "QuestionCompiler",
                 "SPARQLCompiler",
                 "DiffedAssertEqual",
-                "TestOntology"
+                "TestGraphProvider"
             ]
         ),
         .target(
-            name: "TestOntology",
+            name: "TestGraphProvider",
             dependencies: ["QuestionCompiler"]
         ),
         .target(
@@ -43,7 +43,7 @@ let package = Package(
                 "QuestionCompiler",
                 "SPARQLCompiler",
                 "DiffedAssertEqual",
-                "TestOntology"
+                "TestGraphProvider"
             ]
         ),
     ]

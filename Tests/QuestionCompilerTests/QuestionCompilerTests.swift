@@ -2,14 +2,14 @@ import DiffedAssertEqual
 import ParserCombinators
 import QuestionCompiler
 import QuestionParser
-import TestOntology
+import TestGraphProvider
 import XCTest
 
 final class QuestionCompilerTests: XCTestCase {
 
     private func newCompiler() -> TestCompiler {
         let environment = TestEnvironment()
-        let provider = TestProvider()
+        let provider = TestGraphProvider()
         return QuestionCompiler(environment: environment, provider: provider)
     }
 

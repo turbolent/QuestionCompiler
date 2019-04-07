@@ -1,7 +1,7 @@
 import XCTest
 import QuestionParser
 import DiffedAssertEqual
-import TestOntology
+import TestGraphProvider
 
 class EncodingTests: XCTestCase {
 
