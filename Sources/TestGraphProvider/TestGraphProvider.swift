@@ -2,14 +2,14 @@
 import QuestionCompiler
 import QuestionParser
 
-public class TestGraphProvider: GraphProvider {
+public final class TestGraphProvider: GraphProvider {
     public typealias Labels = TestLabels
     public typealias Env = TestEnvironment
 
     public init() {}
 
     public func makePersonEdge(
-        env _: TestEnvironment
+        env _: Env
     ) throws -> TestGraphProvider.Edge {
         return .outgoing(.isA, TestClasses.person)
     }
@@ -18,7 +18,7 @@ public class TestGraphProvider: GraphProvider {
         name: [Token],
         node: TestGraphProvider.Node,
         subject _: Subject,
-        env _: TestEnvironment
+        env _: Env
     ) throws -> TestGraphProvider.Edge {
         let lemmas = name.map { $0.lemma }
         switch lemmas {
@@ -33,7 +33,7 @@ public class TestGraphProvider: GraphProvider {
         name: [Token],
         node: TestGraphProvider.Node,
         context _: EdgeContext,
-        env _: TestEnvironment
+        env _: Env
     ) throws -> TestGraphProvider.Edge {
         let lemmas = name.map { $0.lemma }
         switch lemmas {
@@ -50,7 +50,7 @@ public class TestGraphProvider: GraphProvider {
         name: [Token],
         node: TestGraphProvider.Node,
         context: EdgeContext,
-        env _: TestEnvironment
+        env _: Env
     ) throws -> TestGraphProvider.Edge {
         let lemmas = (name + context.filter)
             .map { $0.lemma }
@@ -66,7 +66,7 @@ public class TestGraphProvider: GraphProvider {
         name: [Token],
         node: TestGraphProvider.Node,
         context: EdgeContext,
-        env: TestEnvironment
+        env: Env
     ) throws -> TestGraphProvider.Edge {
         let lemmas = (name + context.filter)
             .map { $0.lemma }
@@ -88,7 +88,7 @@ public class TestGraphProvider: GraphProvider {
         name: [Token],
         node: TestGraphProvider.Node,
         context: EdgeContext,
-        env: TestEnvironment
+        env: Env
     ) throws -> TestGraphProvider.Edge {
         let lemmas = (name + context.filter)
             .map { $0.lemma }
@@ -116,7 +116,7 @@ public class TestGraphProvider: GraphProvider {
     public func makeRelationshipEdge(
         name: [Token],
         node: TestGraphProvider.Node,
-        env _: TestEnvironment
+        env _: Env
     ) throws -> TestGraphProvider.Edge {
         let lemmas = name.filter { $0.tag != "DT" }.map { $0.lemma }
         switch lemmas {
@@ -160,7 +160,7 @@ public class TestGraphProvider: GraphProvider {
     public func makeValueNode(
         name: [Token],
         filter _: [Token],
-        env: TestEnvironment
+        env: Env
     ) throws -> TestGraphProvider.Node {
         if let `class` = getClass(name) {
             return env.newNode()
@@ -179,7 +179,7 @@ public class TestGraphProvider: GraphProvider {
         number: [Token],
         unit: [Token],
         filter _: [Token],
-        env _: TestEnvironment
+        env _: Env
     ) throws -> TestGraphProvider.Node {
         let numberString = number.map { $0.lemma }.joined(separator: " ")
         let unitString = unit.isEmpty
