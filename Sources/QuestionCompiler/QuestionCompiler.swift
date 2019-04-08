@@ -5,6 +5,7 @@ public typealias GraphNode = Node
 public typealias GraphEdge = Edge
 public typealias GraphFilter = Filter
 
+
 public final class QuestionCompiler<Provider>
     where Provider: GraphProvider
 {

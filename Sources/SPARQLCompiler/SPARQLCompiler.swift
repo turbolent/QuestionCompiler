@@ -2,7 +2,12 @@
 import QuestionCompiler
 import SPARQL
 
-public final class SPARQLCompiler<Backend> where Backend: SPARQLBackend {
+public final class SPARQLCompiler<Backend>
+    where Backend: SPARQLBackend,
+        Backend.Env.Labels.Node: Hashable,
+        Backend.Env.Labels.Edge: Hashable
+{
+
     public typealias Node = GraphNode<Backend.Env.Labels>
     public typealias Edge = GraphEdge<Backend.Env.Labels>
     public typealias Filter = GraphFilter<Backend.Env.Labels>

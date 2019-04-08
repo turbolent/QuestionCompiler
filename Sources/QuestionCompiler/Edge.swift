@@ -1,5 +1,5 @@
 
-public indirect enum Edge<Labels>: Hashable
+public indirect enum Edge<Labels>
     where Labels: GraphLabels
 {
     public typealias Node = GraphNode<Labels>
@@ -66,8 +66,9 @@ public indirect enum Edge<Labels>: Hashable
 }
 
 
-extension Edge: Encodable {
-
+extension Edge: Encodable
+    where Labels.Edge: Encodable, Labels.Node: Encodable
+{
     private enum CodingKeys: CodingKey {
         case type
         case subtype
@@ -121,3 +122,11 @@ extension Edge: Encodable {
         }
     }
 }
+
+
+extension Edge: Equatable
+    where Labels.Edge: Equatable, Labels.Node: Equatable {}
+
+
+extension Edge: Hashable
+    where Labels.Edge: Hashable, Labels.Node: Hashable {}

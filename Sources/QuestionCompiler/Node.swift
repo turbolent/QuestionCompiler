@@ -1,5 +1,5 @@
 
-public struct Node<Labels>: Hashable
+public struct Node<Labels>
     where Labels: GraphLabels
 {
     public typealias Node = GraphNode<Labels>
@@ -79,8 +79,9 @@ public struct Node<Labels>: Hashable
     }
 }
 
-extension Node: Encodable {
-
+extension Node: Encodable
+    where Labels.Node: Encodable, Labels.Edge: Encodable
+{
     private enum CodingKeys: CodingKey {
         case type
         case label
@@ -98,3 +99,9 @@ extension Node: Encodable {
         try container.encode(order, forKey: .order)
     }
 }
+
+extension Node: Equatable
+    where Labels.Edge: Equatable, Labels.Node: Equatable {}
+
+extension Node: Hashable
+    where Labels.Node: Hashable, Labels.Edge: Hashable {}

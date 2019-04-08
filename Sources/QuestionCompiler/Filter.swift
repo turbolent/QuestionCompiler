@@ -1,7 +1,7 @@
 
 import QuestionParser
 
-public indirect enum Filter<Labels>: Hashable
+public indirect enum Filter<Labels>
     where Labels: GraphLabels
 {
     public typealias Node = GraphNode<Labels>
@@ -31,8 +31,9 @@ public indirect enum Filter<Labels>: Hashable
 }
 
 
-extension Filter: Encodable {
-
+extension Filter: Encodable
+    where Labels.Node: Encodable, Labels.Edge: Encodable
+{
     private enum CodingKeys: CodingKey {
         case type
         case subtype
@@ -70,3 +71,10 @@ extension Filter: Encodable {
         }
     }
 }
+
+
+extension Filter: Equatable
+    where Labels.Edge: Equatable, Labels.Node: Equatable {}
+
+extension Filter: Hashable
+    where Labels.Edge: Hashable, Labels.Node: Hashable {}

@@ -9,12 +9,13 @@ public struct TestLabels: GraphLabels {
 }
 
 
-public enum TestNodeLabel: NodeLabel {
+public enum TestNodeLabel: NodeLabel, Hashable {
     case variable(Int)
     case item(String)
     case string(String)
     case number(Double, unit: String?)
 }
+
 
 extension TestNodeLabel: Encodable {
 
@@ -64,6 +65,7 @@ extension TestNodeLabel: Encodable {
     }
 }
 
+
 public struct TestClasses {
     public static let person = TestNode(label: .item("person"))
     public static let movie = TestNode(label: .item("movie"))
@@ -79,7 +81,7 @@ public struct TestClasses {
 }
 
 
-public struct TestEdgeLabel: EdgeLabel {
+public struct TestEdgeLabel: EdgeLabel, Hashable {
     public let name: String
 
     public static let isA = TestEdgeLabel(name: "isA")
@@ -99,6 +101,7 @@ public struct TestEdgeLabel: EdgeLabel {
     public static let hasPopulation = TestEdgeLabel(name: "hasPopulation")
     public static let discovered = TestEdgeLabel(name: "discovered")
 }
+
 
 extension TestEdgeLabel: Encodable {
 
