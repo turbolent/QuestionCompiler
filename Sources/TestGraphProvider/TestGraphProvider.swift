@@ -16,13 +16,13 @@ public final class TestGraphProvider: GraphProvider {
 
     public func makeNamedPropertyEdge(
         name: [Token],
-        node: TestGraphProvider.Node,
         subject _: Subject,
-        env _: Env
+        env: Env
     ) throws -> TestGraphProvider.Edge {
         let lemmas = name.map { $0.lemma }
         switch lemmas {
         case ["write"]:
+            let node = env.newNode()
             return .incoming(node, .hasAuthor)
         default:
             fatalError("not implemented")

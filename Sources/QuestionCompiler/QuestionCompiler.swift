@@ -112,7 +112,6 @@ public final class QuestionCompiler<Provider>
         case let .named(name):
             return try provider.makeNamedPropertyEdge(
                 name: name,
-                node: environment.newNode(),
                 subject: subject,
                 env: environment
             )

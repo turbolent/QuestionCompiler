@@ -39,7 +39,7 @@ public protocol GraphProvider {
     /// .incoming(otherNode, EdgeLabels.hasAuthor)
     /// ```
     ///
-    func makeNamedPropertyEdge(name: [Token], node: Node, subject: Subject, env: Env) throws -> Edge
+    func makeNamedPropertyEdge(name: [Token], subject: Subject, env: Env) throws -> Edge
 
     /// Return and edge which will identify a node representing the subject (given in the context)
     /// to have a property given by `name`. `node` is the object.
