@@ -23,7 +23,7 @@ public protocol GraphProvider {
     func makePersonEdge(env: Env) throws -> Edge
 
     /// Return an edge which will identify a node representing the subject to have the property
-    /// given by `name`. `node` is the object.
+    /// given by `name`.
     ///
     /// Invoked for `Property.named`, i.e., when the subject has a simple property without a filter,
     /// e.g., for the question "who wrote?".
@@ -34,9 +34,9 @@ public protocol GraphProvider {
     /// ```
     ///
     /// A suitable return value could be an incoming edge declaring that the source
-    /// is the author of the target node:
+    /// is the author of something:
     /// ```
-    /// .incoming(otherNode, EdgeLabels.hasAuthor)
+    /// .incoming(env.newNode(), EdgeLabels.hasAuthor)
     /// ```
     ///
     func makeNamedPropertyEdge(name: [Token], subject: Subject, env: Env) throws -> Edge
