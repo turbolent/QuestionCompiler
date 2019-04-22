@@ -17,7 +17,7 @@ public protocol GraphProvider {
     /// A suitable return value could be an outgoing edge declaring that the edge source
     /// is a an instance of a person:
     /// ```
-    /// .outgoing(EdgeLabels.isInstanceOf, NodeLabels.person)
+    /// .outgoing(EdgeLabels.isInstanceOf, Node(label: NodeLabels.person))
     /// ```
     ///
     func makePersonEdge(env: Env) throws -> Edge
@@ -34,7 +34,7 @@ public protocol GraphProvider {
     /// ```
     ///
     /// A suitable return value could be an incoming edge declaring that the source
-    /// is the author of the target node
+    /// is the author of the target node:
     /// ```
     /// .incoming(otherNode, EdgeLabels.hasAuthor)
     /// ```
@@ -48,12 +48,13 @@ public protocol GraphProvider {
     /// with a filter (given in the context), e.g., for the question "what books did Shakespeare write?".
     ///
     /// For this example the object (`node`) is representing Shakespeare, the subject
-    /// (given in the context) is representing a book, and `name` would be
+    /// (given in the context) is representing a book, and `name` would be:
     /// ```
     /// [
     ///     Token(word: "did", tag: "VBD", lemma: "do"),
     ///     Token(word: "write", tag: "VB", lemma: "write")
     /// ]
+    /// ```
     ///
     /// A suitable return value could be an outgoing edge declaring that the source
     /// has the target (the node representing Shakespeare) as its author:
@@ -69,7 +70,7 @@ public protocol GraphProvider {
     /// Invoked for `Property.adjectiveWithFilter`, i.e., when th e subject has a property
     /// with an adjective, e.g., for the question "who is 42 years old?".
     ///
-    /// For this example `name` would be
+    /// For this example `name` would be:
     /// ```
     /// [
     ///     Token(word: "is", tag: "VBP", lemma: "be"),
@@ -96,7 +97,7 @@ public protocol GraphProvider {
     /// [Token(word: "is", tag: "VBD", lemma: "be")]
     /// ```
     ///
-    /// `context.filter` would be
+    /// `context.filter` would be:
     /// ```
     /// [
     ///     Token(word: "older", tag: "JJR", lemma: "old"),
@@ -119,7 +120,7 @@ public protocol GraphProvider {
     /// Invoked for `Property.withFilter` with any filter but `Filter.plain` or `Filter.withModifier`,
     /// i.e., when the filter is not comparative, e.g., for the question "who wrote Macbeth?".
     ///
-    /// For this example `name` would be
+    /// For this example `name` would be:
     /// ```
     /// [Token(word: "wrote", tag: "VBD", lemma: "write")]
     /// ```
@@ -137,7 +138,7 @@ public protocol GraphProvider {
     /// Invoked for `Value.relationship`, i.e., when the object/value in a question contains
     /// a possessive relationship, e.g., for the question "who married Clinton's daughter?".
     ///
-    /// For this example `name` would be
+    /// For this example `name` would be:
     /// ```
     /// [Token(word: "daughter", tag: "NN", lemma: "daughter")]
     /// ```
@@ -158,7 +159,7 @@ public protocol GraphProvider {
     /// For example, this method is invoked for the questions
     /// "which authors were born before 2000?" and "who lived in Berlin?".
     ///
-    /// For the first example `name` would be
+    /// For the first example `name` would be:
     /// ```
     /// [Token(word: "authors", tag: "NNS", lemma: "author")]
     /// ```
@@ -166,10 +167,10 @@ public protocol GraphProvider {
     /// A suitable return value could be an anonymous node with an outgoing edge declaring
     /// that the node should be an instance of an author:
     /// ```
-    /// .outgoing(EdgeLabels.isInstanceOf, NodeLabels.author)
+    /// .outgoing(EdgeLabels.isInstanceOf, Node(label: NodeLabels.author))
     /// ```
     ///
-    /// For the second example, `name` would be
+    /// For the second example, `name` would be:
     /// ```
     /// [Token(word: "Berlin", tag: "NNP", lemma: "Berlin")]
     /// ```
