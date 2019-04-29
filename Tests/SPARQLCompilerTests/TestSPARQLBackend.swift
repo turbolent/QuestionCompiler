@@ -6,10 +6,6 @@ import TestGraphProvider
 
 public class TestSPARQLBackend: SPARQLBackend {
 
-    public typealias N = TestNodeLabel
-    public typealias E = TestEdgeLabel
-    public typealias Env = TestEnvironment
-
     public init() {}
 
     public func compile(nodeLabel: TestNodeLabel, env: TestEnvironment) -> SPARQL.Node {
