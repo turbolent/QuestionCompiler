@@ -16,6 +16,32 @@ public indirect enum Edge<Labels>
         grouping: Node
     )
 
+    public init(conjunction edges: [Edge]) throws {
+        guard let firstEdge = edges.first else {
+            self = .conjunction([])
+            return
+        }
+
+        if edges.dropFirst().first == nil {
+            self = firstEdge
+        } else {
+            self = .conjunction(edges)
+        }
+    }
+
+    public init(disjunction edges: [Edge]) throws {
+        guard let firstEdge = edges.first else {
+            self = .disjunction([])
+            return
+        }
+
+        if edges.dropFirst().first == nil {
+            self = firstEdge
+        } else {
+            self = .disjunction(edges)
+        }
+    }
+
     public func and(_ edge: Edge) -> Edge {
         switch (self, edge) {
         case let (.conjunction(edges), .conjunction(otherEdges)):
