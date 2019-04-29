@@ -16,7 +16,7 @@ public indirect enum Edge<Labels>
         grouping: Node
     )
 
-    public init(conjunction edges: [Edge]) throws {
+    public init(conjunction edges: [Edge]) {
         guard let firstEdge = edges.first else {
             self = .conjunction([])
             return
@@ -29,7 +29,7 @@ public indirect enum Edge<Labels>
         }
     }
 
-    public init(disjunction edges: [Edge]) throws {
+    public init(disjunction edges: [Edge]) {
         guard let firstEdge = edges.first else {
             self = .disjunction([])
             return
