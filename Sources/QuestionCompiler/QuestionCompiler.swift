@@ -1,5 +1,6 @@
-
 import QuestionParser
+import Foundation
+
 
 public typealias GraphNode = Node
 public typealias GraphEdge = Edge
@@ -10,7 +11,7 @@ public final class QuestionCompiler<Provider>
     where Provider: GraphProvider
 {
     public enum CompilationError: Error {
-        case unimplemented
+        case notImplemented
     }
 
     public typealias Labels = Provider.Env.Labels
@@ -103,7 +104,7 @@ public final class QuestionCompiler<Provider>
             )
 
         case .withProperty:
-            throw CompilationError.unimplemented
+            throw CompilationError.notImplemented
         }
     }
 
@@ -296,7 +297,17 @@ public final class QuestionCompiler<Provider>
             }
 
         case .relationship:
-            throw CompilationError.unimplemented
+            throw CompilationError.notImplemented
+        }
+    }
+}
+
+
+extension QuestionCompiler.CompilationError: LocalizedError {
+    public var errorDescription: String? {
+        switch self {
+        case .notImplemented:
+            return "not implemented"
         }
     }
 }
