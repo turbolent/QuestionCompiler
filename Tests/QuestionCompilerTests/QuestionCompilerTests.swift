@@ -209,7 +209,7 @@ final class QuestionCompilerTests: XCTestCase {
                     property: .withFilter(
                         name: [],
                         filter: .withModifier(
-                            modifier: [t("in", "IN", "of")],
+                            modifier: [t("in", "IN", "in")],
                             value: .and([
                                 .named([t("Japan", "NNP", "japan")]),
                                 .named([t("China", "NNP", "china")])
@@ -251,13 +251,21 @@ final class QuestionCompilerTests: XCTestCase {
                         name: [],
                         filter: .and([
                             .withModifier(
-                                modifier: [t("in", "IN", "of")],
+                                modifier: [t("in", "IN", "in")],
                                 value: .named([t("Japan", "NNP", "japan")])
                             ),
-                            .withModifier(
-                                modifier: [t("in", "IN", "of")],
-                                value: .named([t("China", "NNP", "china")])
-                            )
+                            .and([
+                                .withModifier(
+                                    modifier: [t("in", "IN", "in")],
+                                    value: .named([t("China", "NNP", "china")])
+                                )
+                            ]),
+                            .or([
+                                .withModifier(
+                                    modifier: [t("of", "IN", "of")],
+                                    value: .named([t("Iceland", "NNP", "iceland")])
+                                )
+                            ])
                         ])
                     )
                 )
@@ -273,12 +281,15 @@ final class QuestionCompilerTests: XCTestCase {
             .hasName("Japan")
         let china = env.newNode()
             .hasName("China")
+        let iceland = env.newNode()
+            .hasName("Iceland")
 
         let expected = city
             & (
                 .outgoing(.isLocatedIn, japan)
-                    | .outgoing(.isLocatedIn, china)
-        )
+                | .outgoing(.isLocatedIn, china)
+                | .outgoing(.isLocatedIn, iceland)
+            )
 
         diffedAssertEqual([expected], result)
     }

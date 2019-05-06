@@ -108,7 +108,7 @@ public final class TestGraphProvider: GraphProvider {
             return .outgoing(.hasDateOfBirth, birthDate)
         case ["attend"]:
             return .outgoing(.attends, node)
-        case ["of"]:
+        case ["of"], ["in"]:
             if case let .named(subjectName) = context.subject {
                 return getRelationshipEdge(name: subjectName, node: node)
             }
