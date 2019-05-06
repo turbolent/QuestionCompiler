@@ -118,7 +118,7 @@ public final class QuestionCompiler<Provider>
             )
 
         case let .withFilter(name, filter):
-            return try compile(filter: filter) { node, contextFactory in
+            return try compile(filter: filter, property: name) { node, contextFactory in
                 let context = try contextFactory(subject)
                 if case .withComparativeModifier = filter {
                     return try provider.makeComparativePropertyEdge(
@@ -138,7 +138,7 @@ public final class QuestionCompiler<Provider>
             }
 
         case let .inverseWithFilter(name, filter):
-            return try compile(filter: filter) { node, contextFactory in
+            return try compile(filter: filter, property: name) { node, contextFactory in
                 try provider.makeInversePropertyEdge(
                     name: name,
                     node: node,
@@ -148,7 +148,7 @@ public final class QuestionCompiler<Provider>
             }
 
         case let .adjectiveWithFilter(name, filter):
-            return try compile(filter: filter) { node, contextFactory in
+            return try compile(filter: filter, property: name) { node, contextFactory in
                 try provider.makeAdjectivePropertyEdge(
                     name: name,
                     node: node,
@@ -171,12 +171,19 @@ public final class QuestionCompiler<Provider>
         }
     }
 
-    public func compile(filter: QuestionParser.Filter, edgeFactory: EdgeFactory) throws -> Edge {
+    public func compile(
+        filter: QuestionParser.Filter,
+        property: [Token],
+        edgeFactory: EdgeFactory
+    )
+        throws -> Edge
+    {
         switch filter {
         case let .withModifier(modifier, value):
             return try compile(
                 value: value,
                 filter: modifier,
+                property: property,
                 edgeFactory: edgeFactory
             )
 
@@ -184,6 +191,7 @@ public final class QuestionCompiler<Provider>
             return try compile(
                 value: value,
                 filter: modifier,
+                property: property,
                 edgeFactory: edgeFactory
             )
 
@@ -191,24 +199,40 @@ public final class QuestionCompiler<Provider>
             return try compile(
                 value: value,
                 filter: [],
+                property: property,
                 edgeFactory: edgeFactory
             )
 
         case let .and(filters):
-            let filters = try filters.map {
-                try compile(filter: $0, edgeFactory: edgeFactory)
+            let edges = try filters.map {
+                try compile(
+                    filter: $0,
+                    property: property,
+                    edgeFactory: edgeFactory
+                )
             }
-            return .conjunction(filters)
+            return .conjunction(edges)
 
         case let .or(filters):
-            let filters = try filters.map {
-                try compile(filter: $0, edgeFactory: edgeFactory)
+            let edges = try filters.map {
+                try compile(
+                    filter: $0,
+                    property: property,
+                    edgeFactory: edgeFactory
+                )
             }
-            return .disjunction(filters)
+            return .disjunction(edges)
         }
     }
 
-    public func compile(value: Value, filter: [Token], edgeFactory: EdgeFactory) throws -> Edge {
+    public func compile(
+        value: Value,
+        filter: [Token],
+        property: [Token],
+        edgeFactory: EdgeFactory
+    )
+        throws -> Edge
+    {
         switch value {
         case let .named(name):
             let node = try provider.makeValueNode(
@@ -262,15 +286,29 @@ public final class QuestionCompiler<Provider>
 
         case let .or(values):
             let edges = try values.map {
-                try compile(value: $0, filter: filter, edgeFactory: edgeFactory)
+                try compile(
+                    value: $0,
+                    filter: filter,
+                    property: property,
+                    edgeFactory: edgeFactory
+                )
             }
             return .disjunction(edges)
 
         case let .and(values):
             let edges = try values.map {
-                try compile(value: $0, filter: filter, edgeFactory: edgeFactory)
+                try compile(
+                    value: $0,
+                    filter: filter,
+                    property: property,
+                    edgeFactory: edgeFactory
+                )
             }
-            return .conjunction(edges)
+            if provider.isDisjunction(property: property, filter: filter) {
+                return .disjunction(edges)
+            } else {
+                return .conjunction(edges)
+            }
 
         case let .relationship(.named(name), second, _):
             let secondEdgeFactory: EdgeFactory = { node, _ in
@@ -283,6 +321,7 @@ public final class QuestionCompiler<Provider>
             let edge = try compile(
                 value: second,
                 filter: filter,
+                property: property,
                 edgeFactory: secondEdgeFactory
             )
             let node = environment.newNode().and(edge)

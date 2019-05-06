@@ -108,9 +108,16 @@ public final class TestGraphProvider: GraphProvider {
             return .outgoing(.hasDateOfBirth, birthDate)
         case ["attend"]:
             return .outgoing(.attends, node)
+        case ["of"]:
+            if case let .named(subjectName) = context.subject {
+                return getRelationshipEdge(name: subjectName, node: node)
+            }
+            break
         default:
-            fatalError("not implemented")
+            break
         }
+
+        fatalError("not implemented")
     }
 
     public func makeRelationshipEdge(
@@ -118,6 +125,30 @@ public final class TestGraphProvider: GraphProvider {
         node: TestGraphProvider.Node,
         env _: Env
     ) throws -> TestGraphProvider.Edge {
+        let relationshipEdge = getRelationshipEdge(name: name, node: node)
+
+        let lemmas = name.filter { $0.tag != "DT" }.map { $0.lemma }
+        switch lemmas {
+        case ["city"]:
+            return relationshipEdge
+                & .outgoing(.isA, TestClasses.city)
+        case ["album"]:
+            return relationshipEdge
+                & .outgoing(.isA, TestClasses.album)
+        case ["daughter"]:
+            return relationshipEdge
+                & .outgoing(.isA, TestClasses.woman)
+        default:
+            return relationshipEdge
+        }
+    }
+
+    private func getRelationshipEdge(
+        name: [Token],
+        node: TestGraphProvider.Node
+    )
+        -> TestGraphProvider.Edge
+    {
         let lemmas = name.filter { $0.tag != "DT" }.map { $0.lemma }
         switch lemmas {
         case ["child"]:
@@ -125,14 +156,11 @@ public final class TestGraphProvider: GraphProvider {
         case ["grandchild"]:
             return .incoming(node, .hasGrandChild)
         case ["city"]:
-            return .outgoing(TestEdgeLabel.isA, TestClasses.city)
-                & .outgoing(TestEdgeLabel.isLocatedIn, node)
+            return .outgoing(.isLocatedIn, node)
         case ["album"]:
-            return .outgoing(.isA, TestClasses.album)
-                & .outgoing(TestEdgeLabel.hasPerformer, node)
+            return .outgoing(.hasPerformer, node)
         case ["daughter"]:
-            return .outgoing(.isA, TestClasses.woman)
-                & .incoming(node, .hasChild)
+            return.incoming(node, .hasChild)
         default:
             fatalError("not implemented")
         }
@@ -144,6 +172,8 @@ public final class TestGraphProvider: GraphProvider {
         }
 
         switch name.first?.lemma {
+        case "album":
+            return TestClasses.album
         case "movie":
             return TestClasses.movie
         case "mountain":
@@ -152,6 +182,8 @@ public final class TestGraphProvider: GraphProvider {
             return TestClasses.author
         case "president":
             return TestClasses.president
+        case "city":
+            return TestClasses.city
         default:
             return nil
         }
@@ -186,5 +218,9 @@ public final class TestGraphProvider: GraphProvider {
             ? nil
             : unit.map { $0.lemma }.joined(separator: " ")
         return Node(label: .number(Double(numberString)!, unit: unitString))
+    }
+
+    public func isDisjunction(property: [Token], filter: [Token]) -> Bool {
+        return property.isEmpty && filter.allSatisfy { $0.tag == "IN" }
     }
 }

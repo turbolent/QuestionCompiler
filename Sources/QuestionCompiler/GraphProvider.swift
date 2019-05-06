@@ -206,4 +206,7 @@ public protocol GraphProvider {
     /// ```
     ///
     func makeNumberNode(number: [Token], unit: [Token], filter: [Token], env: Env) throws -> Node
+
+    // TODO: document
+    func isDisjunction(property: [Token], filter: [Token]) -> Bool
 }

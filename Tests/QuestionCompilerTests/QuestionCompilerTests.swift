@@ -200,39 +200,89 @@ final class QuestionCompilerTests: XCTestCase {
     }
 
     func testQ7() throws {
+
         let compiler = newCompiler()
         let result = try compiler.compile(
             question: .other(
-                .relationship(
-                    .named([
-                        t("cities", "NNS", "city")
-                    ]),
-                    .and([
-                        .named([t("Japan", "NNP", "japan")]),
-                        .named([t("China", "NNP", "china")])
-                    ]),
-                    token: t("of", "IN", "of")
+                .withProperty(
+                    .named([t("cities", "NNS", "city")]),
+                    property: .withFilter(
+                        name: [],
+                        filter: .withModifier(
+                            modifier: [t("in", "IN", "of")],
+                            value: .and([
+                                .named([t("Japan", "NNP", "japan")]),
+                                .named([t("China", "NNP", "china")])
+                            ])
+                        )
+                    )
                 )
             )
         )
 
         let env = TestEnvironment()
 
+        let city = env.newNode()
+            .isA(TestClasses.city)
+
         let japan = env.newNode()
             .hasName("Japan")
         let china = env.newNode()
             .hasName("China")
 
-        let japaneseCities = env.newNode()
-            .isA(TestClasses.city)
-            .outgoing(.isLocatedIn, japan)
+        let expected = city
+            & (
+                .outgoing(.isLocatedIn, japan)
+                | .outgoing(.isLocatedIn, china)
+            )
 
-        let chineseCities = env.newNode()
-            .isA(TestClasses.city)
-            .outgoing(.isLocatedIn, china)
-
-        diffedAssertEqual([japaneseCities, chineseCities], result)
+        diffedAssertEqual([expected], result)
     }
+
+    func testQ7_2() throws {
+        // TODO: make `and` in relationship-like situation means "or'!
+
+        let compiler = newCompiler()
+        let result = try compiler.compile(
+            question: .other(
+                .withProperty(
+                    .named([t("cities", "NNS", "city")]),
+                    property: .withFilter(
+                        name: [],
+                        filter: .and([
+                            .withModifier(
+                                modifier: [t("in", "IN", "of")],
+                                value: .named([t("Japan", "NNP", "japan")])
+                            ),
+                            .withModifier(
+                                modifier: [t("in", "IN", "of")],
+                                value: .named([t("China", "NNP", "china")])
+                            )
+                        ])
+                    )
+                )
+            )
+        )
+
+        let env = TestEnvironment()
+
+        let city = env.newNode()
+            .isA(TestClasses.city)
+
+        let japan = env.newNode()
+            .hasName("Japan")
+        let china = env.newNode()
+            .hasName("China")
+
+        let expected = city
+            & (
+                .outgoing(.isLocatedIn, japan)
+                    | .outgoing(.isLocatedIn, china)
+        )
+
+        diffedAssertEqual([expected], result)
+    }
+
 
     func testQ8() throws {
         let compiler = newCompiler()
@@ -381,8 +431,8 @@ final class QuestionCompilerTests: XCTestCase {
 
         let expected = person
             & (
-                Edge.outgoing(.hasPlaceOfBirth, place)
-                | Edge.outgoing(.hasPlaceOfDeath, place2)
+                .outgoing(.hasPlaceOfBirth, place)
+                | .outgoing(.hasPlaceOfDeath, place2)
             )
 
         diffedAssertEqual([expected], result)
@@ -417,8 +467,8 @@ final class QuestionCompilerTests: XCTestCase {
 
         let expected = person
             & (
-                Edge.outgoing(.attends, place)
-                | Edge.outgoing(.attends, place2)
+                .outgoing(.attends, place)
+                | .outgoing(.attends, place2)
             )
 
         diffedAssertEqual([expected], result)
@@ -489,8 +539,8 @@ final class QuestionCompilerTests: XCTestCase {
 
         let expected = person
             & (
-                Edge.outgoing(.attends, place)
-                | Edge.outgoing(.attends, place2)
+                .outgoing(.attends, place)
+                | .outgoing(.attends, place2)
             )
 
         diffedAssertEqual([expected], result)
@@ -536,27 +586,32 @@ final class QuestionCompilerTests: XCTestCase {
         let compiler = newCompiler()
         let result = try compiler.compile(
             question: .other(
-                .relationship(
+                .withProperty(
                     .named([t("albums", "NNS", "album")]),
-                    .named([
-                        t("Pink", "NNP", "pink"),
-                        t("Floyd", "NNP", "floyd")
-                    ]),
-                    token: t("of", "IN", "of")
+                    property: .withFilter(
+                        name: [],
+                        filter: .withModifier(
+                            modifier: [t("of", "IN", "of")],
+                            value: .named([
+                                t("Pink", "NNP", "pink"),
+                                t("Floyd", "NNP", "floyd")
+                            ])
+                        )
+                    )
                 )
             )
         )
 
         let env = TestEnvironment()
 
-        let artist = env
-            .newNode()
+        let album = env.newNode()
+            .isA(TestClasses.album)
+
+        let pinkFloyd = env.newNode()
             .hasName("Pink Floyd")
 
-        let expected = env
-            .newNode()
-            .isA(TestClasses.album)
-            .outgoing(.hasPerformer, artist)
+        let expected = album
+            .outgoing(.hasPerformer, pinkFloyd)
 
         diffedAssertEqual([expected], result)
     }
@@ -595,8 +650,8 @@ final class QuestionCompilerTests: XCTestCase {
 
         let daughter = env
             .newNode()
-            .isA(TestClasses.woman)
             .incoming(bill, .hasChild)
+            .isA(TestClasses.woman)
 
         let expected = person
             .outgoing(.hasSpouse, daughter)
