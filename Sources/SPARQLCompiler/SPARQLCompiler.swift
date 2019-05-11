@@ -3,11 +3,8 @@ import QuestionCompiler
 import SPARQL
 
 public final class SPARQLCompiler<Backend>
-    where Backend: SPARQLBackend,
-        Backend.Env.Labels.Node: Hashable,
-        Backend.Env.Labels.Edge: Hashable
+    where Backend: SPARQLBackend
 {
-
     public typealias Node = GraphNode<Backend.Env.Labels>
     public typealias Edge = GraphEdge<Backend.Env.Labels>
     public typealias Filter = GraphFilter<Backend.Env.Labels>
@@ -183,7 +180,10 @@ public final class SPARQLCompiler<Backend>
         return nodeResult
     }
 
-    private func compile(edges: [Edge], compiledNode: SPARQL.Node, merge: OpResultMerger) throws -> NodeResult {
+    private func compile<C>(edges: C, compiledNode: SPARQL.Node, merge: OpResultMerger)
+        throws -> NodeResult
+        where C: Collection, C.Element == Edge
+    {
         let compiledEdges = try edges.map { edge in
             try compile(edge: edge, compiledNode: compiledNode)
         }

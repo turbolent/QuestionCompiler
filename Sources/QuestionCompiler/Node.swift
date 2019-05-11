@@ -1,6 +1,8 @@
 
-public struct Node<Labels>
-    where Labels: GraphLabels
+public struct Node<Labels>: Hashable
+    where Labels: GraphLabels,
+        Labels.Node: Hashable,
+        Labels.Edge: Hashable
 {
     public typealias Node = GraphNode<Labels>
     public typealias Edge = GraphEdge<Labels>
@@ -99,9 +101,3 @@ extension Node: Encodable
         try container.encode(order, forKey: .order)
     }
 }
-
-extension Node: Equatable
-    where Labels.Edge: Equatable, Labels.Node: Equatable {}
-
-extension Node: Hashable
-    where Labels.Node: Hashable, Labels.Edge: Hashable {}

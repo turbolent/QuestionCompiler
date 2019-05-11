@@ -1,13 +1,16 @@
-
 import QuestionParser
+import OrderedSet
 
-public indirect enum Filter<Labels>
-    where Labels: GraphLabels
+
+public indirect enum Filter<Labels>: Hashable
+    where Labels: GraphLabels,
+        Labels.Node: Hashable,
+        Labels.Edge: Hashable
 {
     public typealias Node = GraphNode<Labels>
     public typealias Filter = GraphFilter<Labels>
 
-    case conjunction([Filter])
+    case conjunction(OrderedSet<Filter>)
     case equals(Node)
     case lessThan(Node)
     case greaterThan(Node)
@@ -15,14 +18,14 @@ public indirect enum Filter<Labels>
     public func and(_ filter: Filter) -> Filter {
         switch (self, filter) {
         case let (.conjunction(filters), .conjunction(otherFilters)):
-            return .conjunction(filters + otherFilters)
+            return .conjunction(filters.union(otherFilters))
         case let (.conjunction(filters), _):
             var newFilters = filters
-            newFilters.append(filter)
+            newFilters.insert(filter)
             return .conjunction(newFilters)
         case let (_, .conjunction(filters)):
-            var newFilters = [self]
-            newFilters.append(contentsOf: filters)
+            var newFilters: OrderedSet = [self]
+            newFilters.formUnion(filters)
             return .conjunction(newFilters)
         default:
             return .conjunction([self, filter])
@@ -71,10 +74,3 @@ extension Filter: Encodable
         }
     }
 }
-
-
-extension Filter: Equatable
-    where Labels.Edge: Equatable, Labels.Node: Equatable {}
-
-extension Filter: Hashable
-    where Labels.Edge: Hashable, Labels.Node: Hashable {}

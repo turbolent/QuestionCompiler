@@ -13,12 +13,16 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/turbolent/QuestionParser.git", .branch("master")),
         .package(url: "https://github.com/turbolent/DiffedAssertEqual.git", from: "0.2.0"),
-        .package(url: "https://github.com/turbolent/SPARQL.git", from: "0.2.0")
+        .package(url: "https://github.com/turbolent/SPARQL.git", from: "0.2.0"),
+        .package(url: "https://github.com/turbolent/OrderedSet.git", from: "0.1.0")
     ],
     targets: [
         .target(
             name: "QuestionCompiler",
-            dependencies: ["QuestionParser"]
+            dependencies: [
+                "QuestionParser",
+                "OrderedSet"
+            ]
         ),
         .testTarget(
             name: "QuestionCompilerTests",

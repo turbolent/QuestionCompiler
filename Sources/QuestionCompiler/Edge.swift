@@ -1,14 +1,18 @@
+import OrderedSet
 
-public indirect enum Edge<Labels>
-    where Labels: GraphLabels
+
+public indirect enum Edge<Labels>: Hashable
+    where Labels: GraphLabels,
+        Labels.Edge: Hashable,
+        Labels.Node: Hashable
 {
     public typealias Node = GraphNode<Labels>
     public typealias Edge = GraphEdge<Labels>
 
     case incoming(_ source: Node, _ label: Labels.Edge)
     case outgoing(_ label: Labels.Edge, _ target: Node)
-    case conjunction([Edge])
-    case disjunction([Edge])
+    case conjunction(OrderedSet<Edge>)
+    case disjunction(OrderedSet<Edge>)
     case aggregate(
         Node,
         function: AggregateFunction,
@@ -16,7 +20,9 @@ public indirect enum Edge<Labels>
         grouping: Node
     )
 
-    public init(conjunction edges: [Edge]) {
+    public init<C>(conjunction edges: C)
+        where C: Collection, C.Element == Edge
+    {
         guard let firstEdge = edges.first else {
             self = .conjunction([])
             return
@@ -25,11 +31,13 @@ public indirect enum Edge<Labels>
         if edges.dropFirst().first == nil {
             self = firstEdge
         } else {
-            self = .conjunction(edges)
+            self = .conjunction(OrderedSet(edges))
         }
     }
 
-    public init(disjunction edges: [Edge]) {
+    public init<C>(disjunction edges: C)
+        where C: Collection, C.Element == Edge
+    {
         guard let firstEdge = edges.first else {
             self = .disjunction([])
             return
@@ -38,23 +46,23 @@ public indirect enum Edge<Labels>
         if edges.dropFirst().first == nil {
             self = firstEdge
         } else {
-            self = .disjunction(edges)
+            self = .disjunction(OrderedSet(edges))
         }
     }
 
     public func and(_ edge: Edge) -> Edge {
         switch (self, edge) {
         case let (.conjunction(edges), .conjunction(otherEdges)):
-            return .conjunction(edges + otherEdges)
+            return .conjunction(edges.union(otherEdges))
 
         case let (.conjunction(edges), _):
             var newEdges = edges
-            newEdges.append(edge)
+            newEdges.insert(edge)
             return .conjunction(newEdges)
 
         case let (_, .conjunction(otherEdges)):
-            var newEdges = [self]
-            newEdges.append(contentsOf: otherEdges)
+            var newEdges: OrderedSet = [self]
+            newEdges.formUnion(otherEdges)
             return .conjunction(newEdges)
 
         default:
@@ -65,16 +73,16 @@ public indirect enum Edge<Labels>
     public func or(_ edge: Edge) -> Edge {
         switch (self, edge) {
         case let (.disjunction(edges), .disjunction(otherEdges)):
-            return .disjunction(edges + otherEdges)
+            return .disjunction(edges.union(otherEdges))
 
         case let (.disjunction(edges), _):
             var newEdges = edges
-            newEdges.append(edge)
+            newEdges.insert(edge)
             return .disjunction(newEdges)
 
         case let (_, .disjunction(otherEdges)):
-            var newEdges = [self]
-            newEdges.append(contentsOf: otherEdges)
+            var newEdges: OrderedSet = [self]
+            newEdges.formUnion(otherEdges)
             return .disjunction(newEdges)
 
         default:
@@ -148,11 +156,3 @@ extension Edge: Encodable
         }
     }
 }
-
-
-extension Edge: Equatable
-    where Labels.Edge: Equatable, Labels.Node: Equatable {}
-
-
-extension Edge: Hashable
-    where Labels.Edge: Hashable, Labels.Node: Hashable {}

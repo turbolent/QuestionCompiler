@@ -1,5 +1,5 @@
 
-public enum AggregateFunction: String, Equatable, Encodable {
+public enum AggregateFunction: String, Hashable, Encodable {
     case avg
     case count
     case min
