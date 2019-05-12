@@ -120,6 +120,7 @@ public final class QuestionCompiler<Provider>
         case let .withFilter(name, filter):
             let (edge, _) = try compile(filter: filter, property: name) { node, contextFactory in
                 let context = try contextFactory(subject)
+
                 if case .withComparativeModifier = filter {
                     return try provider.makeComparativePropertyEdge(
                         name: name,
@@ -151,10 +152,21 @@ public final class QuestionCompiler<Provider>
 
         case let .adjectiveWithFilter(name, filter):
             let (edge, _) = try compile(filter: filter, property: name) { node, contextFactory in
-                try provider.makeAdjectivePropertyEdge(
+                let context = try contextFactory(subject)
+
+                if case .withComparativeModifier = filter {
+                    return try provider.makeComparativePropertyEdge(
+                        name: name,
+                        node: node,
+                        context: context,
+                        env: environment
+                    )
+                }
+
+                return try provider.makeAdjectivePropertyEdge(
                     name: name,
                     node: node,
-                    context: contextFactory(subject),
+                    context: context,
                     env: environment
                 )
             }

@@ -685,4 +685,42 @@ final class QuestionCompilerTests: XCTestCase {
 
         diffedAssertEqual([expected], result)
     }
+
+    func testQ19() throws {
+        let compiler = newCompiler()
+        let result = try compiler.compile(
+            question: .person(
+                .adjectiveWithFilter(
+                    name: [
+                        t("is", "VBZ", "be"),
+                        t("old", "JJ", "old"),
+                    ],
+                    filter: .withComparativeModifier(
+                        modifier: [
+                            t("more", "JJR", "more"),
+                            t("than", "IN", "than"),
+                        ],
+                        value: .numberWithUnit(
+                            [t("42", "CD", "42")],
+                            unit: [t("years", "NNS", "year")]
+                        )
+                    )
+                )
+            )
+        )
+
+        let env = TestEnvironment()
+
+        let person = env.newNode()
+            .isA(TestClasses.person)
+
+        let age = env
+            .newNode()
+            .filtered(.greaterThan(.number(42.0, unit: "year")))
+
+        let expected = person
+            .outgoing(.hasAge, age)
+
+        diffedAssertEqual([expected], result)
+    }
 }

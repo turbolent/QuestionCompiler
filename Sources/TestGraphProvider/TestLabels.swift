@@ -96,6 +96,7 @@ public struct TestEdgeLabel: EdgeLabel, Hashable {
     public static let isLocatedIn = TestEdgeLabel(name: "isLocatedIn")
     public static let hasAuthor = TestEdgeLabel(name: "hasAuthor")
     public static let hasDateOfBirth = TestEdgeLabel(name: "hasDateOfBirth")
+    public static let hasAge = TestEdgeLabel(name: "hasAge")
     public static let attends = TestEdgeLabel(name: "attends")
     public static let hasPerformer = TestEdgeLabel(name: "hasPerformer")
     public static let hasPopulation = TestEdgeLabel(name: "hasPopulation")

@@ -79,6 +79,10 @@ public final class TestGraphProvider: GraphProvider {
                 .newNode()
                 .filtered(.lessThan(otherBirthDate))
             return .outgoing(.hasDateOfBirth, birthDate)
+        case ["be", "old", "more", "than"] where context.valueIsNumber:
+            let age = env.newNode()
+                .filtered(.greaterThan(node))
+            return .outgoing(.hasAge, age)
         default:
             fatalError("not implemented")
         }
