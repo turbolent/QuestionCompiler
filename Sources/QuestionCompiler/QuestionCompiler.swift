@@ -5,6 +5,7 @@ import Foundation
 public typealias GraphNode = Node
 public typealias GraphEdge = Edge
 public typealias GraphFilter = Filter
+public typealias GraphOrder = Order
 
 
 public final class QuestionCompiler<Provider>
