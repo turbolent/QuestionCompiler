@@ -28,10 +28,8 @@ public indirect enum Edge<Labels>: Hashable
             return
         }
 
-        if edges.dropFirst().first == nil {
-            self = firstEdge
-        } else {
-            self = .conjunction(OrderedSet(edges))
+        self = edges.dropFirst().reduce(firstEdge) {
+            $0.and($1)
         }
     }
 
@@ -43,10 +41,8 @@ public indirect enum Edge<Labels>: Hashable
             return
         }
 
-        if edges.dropFirst().first == nil {
-            self = firstEdge
-        } else {
-            self = .disjunction(OrderedSet(edges))
+        self = edges.dropFirst().reduce(firstEdge) {
+            $0.or($1)
         }
     }
 
