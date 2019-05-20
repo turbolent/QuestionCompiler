@@ -87,34 +87,6 @@ public protocol GraphProvider {
     func makeAdjectivePropertyEdge(name: [Token], node: Node, context: EdgeContext, env: Env) throws -> Edge
 
     /// Return an edge which will identify the node representing the subject to have the property
-    /// given by `name`, which compares to `node`, which is the object.
-    ///
-    /// Invoked for `Property.withFilter` with `Filter.withComparativeModifier`, i.e., when the property
-    /// contains a comparative filter, e.g., for the question "who is older than Obama?".
-    ///
-    /// For this example `name` would be
-    /// ```
-    /// [Token(word: "is", tag: "VBD", lemma: "be")]
-    /// ```
-    ///
-    /// `context.filter` would be:
-    /// ```
-    /// [
-    ///     Token(word: "older", tag: "JJR", lemma: "old"),
-    ///     Token(word: "than", tag: "IN", lemma: "than")
-    /// ]
-    /// ```
-    ///
-    /// A suitable return value could be an outgoing edge declaring that the source has
-    /// an earlier birth date than that of `node`:
-    /// ```
-    /// let birthDate = otherAgeNode.incoming(node, EdgeLabels.hasBirthDate)
-    /// return .outgoing(EdgeLabels.hasBirthDate, ageNode.filter(.lessThan(birthDate)))
-    /// ```
-    ///
-    func makeComparativePropertyEdge(name: [Token], node: Node, context: EdgeContext, env: Env) throws -> Edge
-
-    /// Return an edge which will identify the node representing the subject to have the property
     /// given by `name`. `node` is the object.
     ///
     /// Invoked for `Property.withFilter` with any filter but `Filter.plain` or `Filter.withModifier`,

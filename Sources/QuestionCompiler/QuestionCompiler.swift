@@ -121,16 +121,6 @@ public final class QuestionCompiler<Provider>
         case let .withFilter(name, filter):
             let (edge, _) = try compile(filter: filter, property: name) { node, contextFactory in
                 let context = try contextFactory(subject)
-
-                if case .withComparativeModifier = filter {
-                    return try provider.makeComparativePropertyEdge(
-                        name: name,
-                        node: node,
-                        context: context,
-                        env: environment
-                    )
-                }
-
                 return try provider.makeValuePropertyEdge(
                     name: name,
                     node: node,
@@ -142,10 +132,11 @@ public final class QuestionCompiler<Provider>
 
         case let .inverseWithFilter(name, filter):
             let (edge, _) = try compile(filter: filter, property: name) { node, contextFactory in
-                try provider.makeInversePropertyEdge(
+                let context = try contextFactory(subject)
+                return try provider.makeInversePropertyEdge(
                     name: name,
                     node: node,
-                    context: contextFactory(subject),
+                    context: context,
                     env: environment
                 )
             }
@@ -154,16 +145,6 @@ public final class QuestionCompiler<Provider>
         case let .adjectiveWithFilter(name, filter):
             let (edge, _) = try compile(filter: filter, property: name) { node, contextFactory in
                 let context = try contextFactory(subject)
-
-                if case .withComparativeModifier = filter {
-                    return try provider.makeComparativePropertyEdge(
-                        name: name,
-                        node: node,
-                        context: context,
-                        env: environment
-                    )
-                }
-
                 return try provider.makeAdjectivePropertyEdge(
                     name: name,
                     node: node,
@@ -204,7 +185,8 @@ public final class QuestionCompiler<Provider>
                 value: value,
                 filter: modifier,
                 property: property,
-                edgeFactory: edgeFactory
+                edgeFactory: edgeFactory,
+                filterIsComparative: false
             )
             return (edges, useDisjunction)
 
@@ -217,7 +199,8 @@ public final class QuestionCompiler<Provider>
                 value: value,
                 filter: modifier,
                 property: property,
-                edgeFactory: edgeFactory
+                edgeFactory: edgeFactory,
+                filterIsComparative: true
             )
             return (edges, useDisjunction)
 
@@ -230,7 +213,8 @@ public final class QuestionCompiler<Provider>
                 value: value,
                 filter: [],
                 property: property,
-                edgeFactory: edgeFactory
+                edgeFactory: edgeFactory,
+                filterIsComparative: false
             )
              return (edges, useDisjunction)
 
@@ -278,7 +262,8 @@ public final class QuestionCompiler<Provider>
         value: Value,
         filter: [Token],
         property: [Token],
-        edgeFactory: EdgeFactory
+        edgeFactory: EdgeFactory,
+        filterIsComparative: Bool
     )
         throws -> Edge
     {
@@ -295,7 +280,8 @@ public final class QuestionCompiler<Provider>
                     filter: filter,
                     value: name,
                     unit: [],
-                    valueIsNumber: false
+                    valueIsNumber: false,
+                    filterIsComparative: filterIsComparative
                 )
             }
 
@@ -312,7 +298,8 @@ public final class QuestionCompiler<Provider>
                     filter: filter,
                     value: number,
                     unit: [],
-                    valueIsNumber: true
+                    valueIsNumber: true,
+                    filterIsComparative: filterIsComparative
                 )
             }
 
@@ -329,7 +316,8 @@ public final class QuestionCompiler<Provider>
                     filter: filter,
                     value: number,
                     unit: unit,
-                    valueIsNumber: true
+                    valueIsNumber: true,
+                    filterIsComparative: filterIsComparative
                 )
             }
 
@@ -339,7 +327,8 @@ public final class QuestionCompiler<Provider>
                     value: $0,
                     filter: filter,
                     property: property,
-                    edgeFactory: edgeFactory
+                    edgeFactory: edgeFactory,
+                    filterIsComparative: filterIsComparative
                 )
             }
             return Edge(disjunction: edges)
@@ -350,7 +339,8 @@ public final class QuestionCompiler<Provider>
                     value: $0,
                     filter: filter,
                     property: property,
-                    edgeFactory: edgeFactory
+                    edgeFactory: edgeFactory,
+                    filterIsComparative: filterIsComparative
                 )
             }
             if provider.isDisjunction(property: property, filter: filter) {
@@ -371,7 +361,8 @@ public final class QuestionCompiler<Provider>
                 value: second,
                 filter: filter,
                 property: property,
-                edgeFactory: secondEdgeFactory
+                edgeFactory: secondEdgeFactory,
+                filterIsComparative: filterIsComparative
             )
             let node = environment.newNode().and(edge)
             return try edgeFactory(node) { subject in
@@ -380,7 +371,8 @@ public final class QuestionCompiler<Provider>
                     filter: filter,
                     value: name,
                     unit: [],
-                    valueIsNumber: false
+                    valueIsNumber: false,
+                    filterIsComparative: filterIsComparative
                 )
             }
 

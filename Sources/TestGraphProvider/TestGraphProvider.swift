@@ -50,35 +50,13 @@ public final class TestGraphProvider: GraphProvider {
         name: [Token],
         node: TestGraphProvider.Node,
         context: EdgeContext,
-        env _: Env
+        env: Env
     ) throws -> TestGraphProvider.Edge {
         let lemmas = (name + context.filter)
             .map { $0.lemma }
         switch lemmas {
         case ["be", "high"]:
             return .outgoing(.hasElevation, node)
-        default:
-            fatalError("not implemented")
-        }
-    }
-
-    public func makeComparativePropertyEdge(
-        name: [Token],
-        node: TestGraphProvider.Node,
-        context: EdgeContext,
-        env: Env
-    ) throws -> TestGraphProvider.Edge {
-        let lemmas = (name + context.filter)
-            .map { $0.lemma }
-        switch lemmas {
-        case ["be", "old", "than"]:
-            let otherBirthDate = env
-                .newNode()
-                .incoming(node, .hasDateOfBirth)
-            let birthDate = env
-                .newNode()
-                .filtered(.lessThan(otherBirthDate))
-            return .outgoing(.hasDateOfBirth, birthDate)
         case ["be", "old", "more", "than"] where context.valueIsNumber:
             let age = env.newNode()
                 .filtered(.greaterThan(node))
@@ -117,6 +95,14 @@ public final class TestGraphProvider: GraphProvider {
                 return getRelationshipEdge(name: subjectName, node: node)
             }
             break
+        case ["be", "old", "than"]:
+            let otherBirthDate = env
+                .newNode()
+                .incoming(node, .hasDateOfBirth)
+            let birthDate = env
+                .newNode()
+                .filtered(.lessThan(otherBirthDate))
+            return .outgoing(.hasDateOfBirth, birthDate)
         default:
             break
         }
